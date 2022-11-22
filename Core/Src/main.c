@@ -21,7 +21,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "bluetooth.h"
+#include "linesensor.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,7 +46,6 @@
 ADC_HandleTypeDef hadc1;
 
 I2C_HandleTypeDef hi2c1;
-I2C_HandleTypeDef hi2c2;
 I2C_HandleTypeDef hi2c3;
 
 SPI_HandleTypeDef hspi1;
@@ -59,7 +62,16 @@ UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
+unsigned char BT_received_msg[20];
 
+uint8_t ADC_received_msg[2];
+uint16_t ADC_received_msg_16;
+
+// Flags
+bool BTMessageFlag = false;
+bool buttonMessageFlag = false;
+
+uint8_t leds_on[] = {0, 0, 0, 0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -72,7 +84,6 @@ static void MX_SPI1_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_SPI3_Init(void);
 static void MX_ADC1_Init(void);
-static void MX_I2C2_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
@@ -80,7 +91,12 @@ static void MX_TIM13_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_TIM5_Init(void);
 /* USER CODE BEGIN PFP */
-
+int __io_putchar(int ch)
+{
+ // Write character to ITM ch.0
+ ITM_SendChar(ch);
+ return(ch);
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -123,7 +139,6 @@ int main(void)
   MX_SPI2_Init();
   MX_SPI3_Init();
   MX_ADC1_Init();
-  MX_I2C2_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM4_Init();
@@ -131,13 +146,56 @@ int main(void)
   MX_USART6_UART_Init();
   MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
+  uint8_t ADC_msg = 0;
 
+  unsigned char bt_msg[20];
+
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_RESET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+
+	  HAL_SPI_TransmitReceive(&hspi1, &ADC_msg, ADC_received_msg, 2, 100);
+	  ADC_received_msg_16 = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
+	  sprintf((char*)bt_msg, "%d\n\r", ADC_received_msg_16);
+	  HAL_UART_Transmit(&huart2, bt_msg, strlen((char*)bt_msg), 100);
+	  //printf("%d\n", ADC_received_msg_16);
+	  //printf("%d %d\n", ADC_received_msg[0], ADC_received_msg[1]);
+
+	  	  for (int j = 0; j < 4; j++)
+		  {
+			  leds_on[j] = 128;
+			  LS_LED_Send(&hspi3, leds_on);
+			  HAL_Delay(500);
+			  for (int i = 0; i < 7; i++)
+			  {
+				  leds_on[j] >>= 1;
+				  LS_LED_Send(&hspi3, leds_on);
+				  HAL_Delay(500);
+
+				  HAL_SPI_TransmitReceive(&hspi1, &ADC_msg, ADC_received_msg, 2, 100);
+				  ADC_received_msg_16 = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
+				  sprintf((char*)bt_msg, "%d\n\r", ADC_received_msg_16);
+				  HAL_UART_Transmit(&huart2, bt_msg, strlen((char*)bt_msg), 100);
+				  //printf("%d\n", ADC_received_msg_16);
+			  }
+			  leds_on[j] >>= 1;
+			  LS_LED_Send(&hspi3, leds_on);
+		  }
+
+
+
+	  // Check if a bluetooth message has arrived
+	  if (BTMessageFlag)
+	  {
+		  BT_ProcessMsg(BT_received_msg);
+		  BT_ReceiveMsg(&huart2, BT_received_msg);
+		  BTMessageFlag = false;
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -285,40 +343,6 @@ static void MX_I2C1_Init(void)
 }
 
 /**
-  * @brief I2C2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_I2C2_Init(void)
-{
-
-  /* USER CODE BEGIN I2C2_Init 0 */
-
-  /* USER CODE END I2C2_Init 0 */
-
-  /* USER CODE BEGIN I2C2_Init 1 */
-
-  /* USER CODE END I2C2_Init 1 */
-  hi2c2.Instance = I2C2;
-  hi2c2.Init.ClockSpeed = 100000;
-  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
-  hi2c2.Init.OwnAddress1 = 0;
-  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c2.Init.OwnAddress2 = 0;
-  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN I2C2_Init 2 */
-
-  /* USER CODE END I2C2_Init 2 */
-
-}
-
-/**
   * @brief I2C3 Initialization Function
   * @param None
   * @retval None
@@ -375,7 +399,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
