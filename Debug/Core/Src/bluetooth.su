@@ -1,0 +1,3 @@
+../Core/Src/bluetooth.c:6:6:BT_TransmitMsg	24	static
+../Core/Src/bluetooth.c:12:6:BT_ReceiveMsg	16	static
+../Core/Src/bluetooth.c:18:6:BT_ProcessMsg	24	static
