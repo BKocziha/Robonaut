@@ -72,7 +72,8 @@ UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
 unsigned char BT_received_msg[20];
-unsigned char BT_send_msg_buff[200];
+unsigned char BT_send_msg_buff[400];
+//unsigned char BT_send_msg_buff_out[100];
 
 uint8_t ADC_inputs[] = {ADC_1, ADC_2, ADC_3, ADC_4, ADC_5, ADC_6, ADC_7, ADC_8};
 
@@ -173,7 +174,7 @@ int main(void)
 	  {
 		  LS_ADC_ChipSelect(i);
 		  //HAL_Delay(10);
-		  for (int j=0; j<7; j++){
+		  for (int j=0; j<8; j++){
 			  HAL_SPI_TransmitReceive(&hspi1, &ADC_inputs[j], ADC_received_msg, 2, 100);
 			  ADC_values[(i-1)*8+j] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
 		  }
@@ -182,28 +183,21 @@ int main(void)
 	  }
 
 	  BT_send_msg_buff[0] = '\0';
-	  for (int k=0; k<32; k++){
+	  for (int k=0; k<22; k++){
 		  sprintf((char*)ADC_value_string, "%d ", ADC_values[k]);
 		  strcat((char*)BT_send_msg_buff, (char*)ADC_value_string);
 	  }
-	  strcat((char*)BT_send_msg_buff, "\n");
+	  strcat((char*)BT_send_msg_buff, "\n\r");
+	  //snprintf((char*)BT_send_msg_buff_out, 100, "%s\n", BT_send_msg_buff);
 	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 	  HAL_Delay(1000);
 
 	  if (buttonMessageFlag){
 		  if(lightIsOn){
-//			  leds_off[0] = 0;
-//			  leds_off[1] = 0;
-//			  leds_off[2] = 0;
-//			  leds_off[3] = 0;
 			  LS_LED_Send(&hspi3, leds_off);
 			  lightIsOn = false;
 		  }
 		  else{
-//			  leds_all_on[0] = 255;
-//			  leds_all_on[1] = 255;
-//			  leds_all_on[2] = 255;
-//			  leds_all_on[3] = 255;
 			  LS_LED_Send(&hspi3, leds_all_on);
 			  lightIsOn = true;
 		  }
