@@ -188,17 +188,15 @@ int main(void)
 		  sprintf((char*)ADC_value_string, "%d ", ADC_values[k]);
 		  strcat((char*)BT_send_msg_buff, (char*)ADC_value_string);
 	  }
-	  HAL_UART_Transmit(&huart2, (uint8_t*)BT_send_msg_buff, strlen((char*)BT_send_msg_buff), 100);
+	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 	  BT_send_msg_buff[0] = '\0';
 	  for (int k=16; k<32; k++){
 		  sprintf((char*)ADC_value_string, "%d ", ADC_values[k]);
 		  strcat((char*)BT_send_msg_buff, (char*)ADC_value_string);
 	  }
 	  strcat((char*)BT_send_msg_buff, "\n\r");
-	  //snprintf((char*)BT_send_msg_buff_out, 100, "%s\n", BT_send_msg_buff);
-	  //BT_TransmitMsg(&huart2, BT_send_msg_buff);
-	  HAL_UART_Transmit(&huart2, (uint8_t*)BT_send_msg_buff, strlen((char*)BT_send_msg_buff), 100);
-	  HAL_Delay(1000);
+	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+	  HAL_Delay(10);
 
 	  if (buttonMessageFlag){
 		  if(lightIsOn){
