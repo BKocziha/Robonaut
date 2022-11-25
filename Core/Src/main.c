@@ -35,6 +35,14 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define ADC_1 0
+#define ADC_2 8
+#define ADC_3 16
+#define ADC_4 24
+#define ADC_5 32
+#define ADC_6 40
+#define ADC_7 48
+#define ADC_8 56
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -46,6 +54,7 @@
 ADC_HandleTypeDef hadc1;
 
 I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
 I2C_HandleTypeDef hi2c3;
 
 SPI_HandleTypeDef hspi1;
@@ -63,21 +72,23 @@ UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
 unsigned char BT_received_msg[20];
+unsigned char BT_send_msg_buff[200];
+
+uint8_t ADC_inputs[] = {ADC_1, ADC_2, ADC_3, ADC_4, ADC_5, ADC_6, ADC_7, ADC_8};
 
 uint8_t ADC_received_msg[2];
 uint16_t ADC_received_msg_16;
 
+bool lightIsOn = false;
+
 // Flags
 bool BTMessageFlag = false;
 bool buttonMessageFlag = false;
-
-uint8_t leds_on[] = {0, 0, 0, 0};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_SPI1_Init(void);
@@ -88,15 +99,12 @@ static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM13_Init(void);
-static void MX_USART6_UART_Init(void);
 static void MX_TIM5_Init(void);
+static void MX_I2C2_Init(void);
+static void MX_USART2_UART_Init(void);
+static void MX_USART6_UART_Init(void);
 /* USER CODE BEGIN PFP */
-int __io_putchar(int ch)
-{
- // Write character to ITM ch.0
- ITM_SendChar(ch);
- return(ch);
-}
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -132,7 +140,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART2_UART_Init();
   MX_I2C1_Init();
   MX_I2C3_Init();
   MX_SPI1_Init();
@@ -143,14 +150,18 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_TIM13_Init();
-  MX_USART6_UART_Init();
   MX_TIM5_Init();
+  MX_I2C2_Init();
+  MX_USART2_UART_Init();
+  MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
-  uint8_t ADC_msg = 0;
+  unsigned char ADC_value_string[10];
+  //uint8_t leds_on[] = {1, 1, 1, 1};
+  uint8_t leds_off[] = {0, 0, 0, 0};
+  uint8_t leds_all_on[] = {255, 255, 255, 255};
+  uint16_t ADC_values[32];
 
-  unsigned char bt_msg[20];
-
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_RESET);
+  LS_LED_Send(&hspi3, leds_off);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -158,44 +169,99 @@ int main(void)
   while (1)
   {
 
-
-	  HAL_SPI_TransmitReceive(&hspi1, &ADC_msg, ADC_received_msg, 2, 100);
-	  ADC_received_msg_16 = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
-	  sprintf((char*)bt_msg, "%d\n\r", ADC_received_msg_16);
-	  HAL_UART_Transmit(&huart2, bt_msg, strlen((char*)bt_msg), 100);
-	  //printf("%d\n", ADC_received_msg_16);
-	  //printf("%d %d\n", ADC_received_msg[0], ADC_received_msg[1]);
-
-	  	  for (int j = 0; j < 4; j++)
-		  {
-			  leds_on[j] = 128;
-			  LS_LED_Send(&hspi3, leds_on);
-			  HAL_Delay(500);
-			  for (int i = 0; i < 7; i++)
-			  {
-				  leds_on[j] >>= 1;
-				  LS_LED_Send(&hspi3, leds_on);
-				  HAL_Delay(500);
-
-				  HAL_SPI_TransmitReceive(&hspi1, &ADC_msg, ADC_received_msg, 2, 100);
-				  ADC_received_msg_16 = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
-				  sprintf((char*)bt_msg, "%d\n\r", ADC_received_msg_16);
-				  HAL_UART_Transmit(&huart2, bt_msg, strlen((char*)bt_msg), 100);
-				  //printf("%d\n", ADC_received_msg_16);
-			  }
-			  leds_on[j] >>= 1;
-			  LS_LED_Send(&hspi3, leds_on);
-		  }
-
-
-
-	  // Check if a bluetooth message has arrived
-	  if (BTMessageFlag)
+	  for (int i=1; i<5; i++)
 	  {
-		  BT_ProcessMsg(BT_received_msg);
-		  BT_ReceiveMsg(&huart2, BT_received_msg);
-		  BTMessageFlag = false;
+		  LS_ADC_ChipSelect(i);
+		  //HAL_Delay(10);
+		  for (int j=0; j<7; j++){
+			  HAL_SPI_TransmitReceive(&hspi1, &ADC_inputs[j], ADC_received_msg, 2, 100);
+			  ADC_values[(i-1)*8+j] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
+		  }
+		  LS_ADC_ChipSelect(0);
+		  //HAL_Delay(10);
 	  }
+
+	  BT_send_msg_buff[0] = '\0';
+	  for (int k=0; k<32; k++){
+		  sprintf((char*)ADC_value_string, "%d ", ADC_values[k]);
+		  strcat((char*)BT_send_msg_buff, (char*)ADC_value_string);
+	  }
+	  strcat((char*)BT_send_msg_buff, "\n");
+	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+	  HAL_Delay(1000);
+
+	  if (buttonMessageFlag){
+		  if(lightIsOn){
+//			  leds_off[0] = 0;
+//			  leds_off[1] = 0;
+//			  leds_off[2] = 0;
+//			  leds_off[3] = 0;
+			  LS_LED_Send(&hspi3, leds_off);
+			  lightIsOn = false;
+		  }
+		  else{
+//			  leds_all_on[0] = 255;
+//			  leds_all_on[1] = 255;
+//			  leds_all_on[2] = 255;
+//			  leds_all_on[3] = 255;
+			  LS_LED_Send(&hspi3, leds_all_on);
+			  lightIsOn = true;
+		  }
+		  buttonMessageFlag = false;
+	  }
+//	  LS_LED_Send(&hspi3, leds_on);
+//
+//	  HAL_Delay(1000);
+//
+//	  HAL_SPI_TransmitReceive(&hspi1, &ADC_msg, ADC_received_msg, 2, 100);
+//	  ADC_received_msg_16 = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
+//	  sprintf((char*)BT_send_msg_buff, "%d %d    %d\n\r", ADC_received_msg[0], ADC_received_msg[1], ADC_received_msg_16);
+//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+
+//	  LS_LED_Send(&hspi3, leds_off);
+//
+//	  HAL_Delay(1000);
+//
+//	  HAL_SPI_TransmitReceive(&hspi1, &ADC_msg, ADC_received_msg, 2, 100);
+//	  ADC_received_msg_16 = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
+//	  sprintf((char*)BT_send_msg_buff, "%d %d    %d\n\r", ADC_received_msg[0], ADC_received_msg[1], ADC_received_msg_16);
+//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+
+
+//	  HAL_SPI_TransmitReceive(&hspi1, &ADC_msg, ADC_received_msg, 2, 100);
+//	  ADC_received_msg_16 = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
+//	  sprintf((char*)BT_send_msg_buff, "%d %d    %d\n\r", ADC_received_msg[0], ADC_received_msg[1], ADC_received_msg_16);
+//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+//
+//	  	  for (int j = 0; j < 4; j++)
+//		  {
+//			  leds_on[j] = 128;
+//			  LS_LED_Send(&hspi3, leds_on);
+//			  HAL_Delay(1000);
+//			  for (int i = 0; i < 7; i++)
+//			  {
+//				  leds_on[j] >>= 1;
+//				  LS_LED_Send(&hspi3, leds_on);
+//				  HAL_Delay(1000);
+//
+//				  HAL_SPI_TransmitReceive(&hspi1, &ADC_msg, ADC_received_msg, 2, 100);
+//				  ADC_received_msg_16 = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
+//				  sprintf((char*)BT_send_msg_buff, "%d %d    %d\n\r", ADC_received_msg[0], ADC_received_msg[1], ADC_received_msg_16);
+//				  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+//			  }
+//			  leds_on[j] >>= 1;
+//			  LS_LED_Send(&hspi3, leds_on);
+//		  }
+
+
+
+//	  // Check if a bluetooth message has arrived
+//	  if (BTMessageFlag)
+//	  {
+//		  BT_ProcessMsg(BT_received_msg);
+//		  BT_ReceiveMsg(&huart2, BT_received_msg);
+//		  BTMessageFlag = false;
+//	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -343,6 +409,40 @@ static void MX_I2C1_Init(void)
 }
 
 /**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.ClockSpeed = 100000;
+  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
+
+}
+
+/**
   * @brief I2C3 Initialization Function
   * @param None
   * @retval None
@@ -399,7 +499,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -748,7 +848,7 @@ static void MX_USART2_UART_Init(void)
 
   /* USER CODE END USART2_Init 1 */
   huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
+  huart2.Init.BaudRate = 9600;
   huart2.Init.WordLength = UART_WORDLENGTH_8B;
   huart2.Init.StopBits = UART_STOPBITS_1;
   huart2.Init.Parity = UART_PARITY_NONE;
@@ -781,7 +881,7 @@ static void MX_USART6_UART_Init(void)
 
   /* USER CODE END USART6_Init 1 */
   huart6.Instance = USART6;
-  huart6.Init.BaudRate = 115200;
+  huart6.Init.BaudRate = 9600;
   huart6.Init.WordLength = UART_WORDLENGTH_8B;
   huart6.Init.StopBits = UART_STOPBITS_1;
   huart6.Init.Parity = UART_PARITY_NONE;
@@ -875,9 +975,22 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_OE_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
 }
 
 /* USER CODE BEGIN 4 */
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//	  BTMessageFlag = true;
+//	  BT_ReceiveMsg(&huart2, BT_received_msg);
+//}
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	buttonMessageFlag = true;
+}
 
 /* USER CODE END 4 */
 
