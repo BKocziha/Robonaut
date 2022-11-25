@@ -72,8 +72,7 @@ UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
 unsigned char BT_received_msg[20];
-unsigned char BT_send_msg_buff[400];
-//unsigned char BT_send_msg_buff_out[100];
+unsigned char BT_send_msg_buff[200];
 
 uint8_t ADC_inputs[] = {ADC_1, ADC_2, ADC_3, ADC_4, ADC_5, ADC_6, ADC_7, ADC_8};
 
@@ -183,13 +182,22 @@ int main(void)
 	  }
 
 	  BT_send_msg_buff[0] = '\0';
-	  for (int k=0; k<22; k++){
+
+	  // Valamiért egy UART Transmitban csak a 100. elemig küldi el - Miért lehet?
+	  for (int k=0; k<16; k++){
+		  sprintf((char*)ADC_value_string, "%d ", ADC_values[k]);
+		  strcat((char*)BT_send_msg_buff, (char*)ADC_value_string);
+	  }
+	  HAL_UART_Transmit(&huart2, (uint8_t*)BT_send_msg_buff, strlen((char*)BT_send_msg_buff), 100);
+	  BT_send_msg_buff[0] = '\0';
+	  for (int k=16; k<32; k++){
 		  sprintf((char*)ADC_value_string, "%d ", ADC_values[k]);
 		  strcat((char*)BT_send_msg_buff, (char*)ADC_value_string);
 	  }
 	  strcat((char*)BT_send_msg_buff, "\n\r");
 	  //snprintf((char*)BT_send_msg_buff_out, 100, "%s\n", BT_send_msg_buff);
-	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+	  //BT_TransmitMsg(&huart2, BT_send_msg_buff);
+	  HAL_UART_Transmit(&huart2, (uint8_t*)BT_send_msg_buff, strlen((char*)BT_send_msg_buff), 100);
 	  HAL_Delay(1000);
 
 	  if (buttonMessageFlag){
