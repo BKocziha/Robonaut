@@ -156,7 +156,7 @@ int main(void)
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
   unsigned char ADC_value_string[10];
-  //uint8_t leds_on[] = {1, 1, 1, 1};
+  uint8_t leds_on[4];// = {1, 1, 1, 1};
   uint8_t leds_off[] = {0, 0, 0, 0};
   uint8_t leds_all_on[] = {255, 255, 255, 255};
   uint16_t ADC_values[32];
@@ -168,34 +168,55 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  // Turn on first set of LEDs
+	  leds_on[0] = 1;leds_on[1] = 1;leds_on[2] = 1;leds_on[3] = 1;
+	  LS_LED_Send(&hspi3, leds_on);
+	  HAL_Delay(10);
+	  // Retrieve data from first set of ADCs
+	  for (int i=1; i<5; i++)
+	  {
+		  LS_ADC_ChipSelect(i);
+		  HAL_SPI_TransmitReceive(&hspi1, &ADC_inputs[0], ADC_received_msg, 2, 100);
+		  ADC_values[(i-1)*8] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
+		  LS_ADC_ChipSelect(0);
+	  }
+	  for (int k=0; k<7; k++)
+	  {
+		  leds_on[0] <<= 1;
+		  leds_on[1] <<= 1;
+		  leds_on[2] <<= 1;
+		  leds_on[3] <<= 1;
+		  LS_LED_Send(&hspi3, leds_on);
+		  HAL_Delay(10);
+
+		  //Retrieve data from the ADCs at the active LEDs
+		  for (int i=1; i<5; i++)
+		  {
+			  LS_ADC_ChipSelect(i);
+			  HAL_SPI_TransmitReceive(&hspi1, &ADC_inputs[k+1], ADC_received_msg, 2, 100);
+			  ADC_values[(i-1)*8+k+1] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
+			  LS_ADC_ChipSelect(0);
+		  }
+	  }
+
+
+
+
 
 	  for (int i=1; i<5; i++)
 	  {
 		  LS_ADC_ChipSelect(i);
-		  //HAL_Delay(10);
 		  for (int j=0; j<8; j++){
 			  HAL_SPI_TransmitReceive(&hspi1, &ADC_inputs[j], ADC_received_msg, 2, 100);
 			  ADC_values[(i-1)*8+j] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
 		  }
 		  LS_ADC_ChipSelect(0);
-		  //HAL_Delay(10);
 	  }
 
-	  BT_send_msg_buff[0] = '\0';
 
 	  // Valamiért egy UART Transmitban csak a 100. elemig küldi el - Miért lehet?
-	  for (int k=0; k<16; k++){
-		  sprintf((char*)ADC_value_string, "%d ", ADC_values[k]);
-		  strcat((char*)BT_send_msg_buff, (char*)ADC_value_string);
-	  }
-	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
-	  BT_send_msg_buff[0] = '\0';
-	  for (int k=16; k<32; k++){
-		  sprintf((char*)ADC_value_string, "%d ", ADC_values[k]);
-		  strcat((char*)BT_send_msg_buff, (char*)ADC_value_string);
-	  }
-	  strcat((char*)BT_send_msg_buff, "\n\r");
-	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+	  LS_LED_Send(&hspi3, leds_off);
+	  LS_BT_SendData(&huart2, BT_send_msg_buff, ADC_values, ADC_value_string);
 	  HAL_Delay(10);
 
 	  if (buttonMessageFlag){
@@ -209,59 +230,6 @@ int main(void)
 		  }
 		  buttonMessageFlag = false;
 	  }
-//	  LS_LED_Send(&hspi3, leds_on);
-//
-//	  HAL_Delay(1000);
-//
-//	  HAL_SPI_TransmitReceive(&hspi1, &ADC_msg, ADC_received_msg, 2, 100);
-//	  ADC_received_msg_16 = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
-//	  sprintf((char*)BT_send_msg_buff, "%d %d    %d\n\r", ADC_received_msg[0], ADC_received_msg[1], ADC_received_msg_16);
-//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
-
-//	  LS_LED_Send(&hspi3, leds_off);
-//
-//	  HAL_Delay(1000);
-//
-//	  HAL_SPI_TransmitReceive(&hspi1, &ADC_msg, ADC_received_msg, 2, 100);
-//	  ADC_received_msg_16 = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
-//	  sprintf((char*)BT_send_msg_buff, "%d %d    %d\n\r", ADC_received_msg[0], ADC_received_msg[1], ADC_received_msg_16);
-//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
-
-
-//	  HAL_SPI_TransmitReceive(&hspi1, &ADC_msg, ADC_received_msg, 2, 100);
-//	  ADC_received_msg_16 = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
-//	  sprintf((char*)BT_send_msg_buff, "%d %d    %d\n\r", ADC_received_msg[0], ADC_received_msg[1], ADC_received_msg_16);
-//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
-//
-//	  	  for (int j = 0; j < 4; j++)
-//		  {
-//			  leds_on[j] = 128;
-//			  LS_LED_Send(&hspi3, leds_on);
-//			  HAL_Delay(1000);
-//			  for (int i = 0; i < 7; i++)
-//			  {
-//				  leds_on[j] >>= 1;
-//				  LS_LED_Send(&hspi3, leds_on);
-//				  HAL_Delay(1000);
-//
-//				  HAL_SPI_TransmitReceive(&hspi1, &ADC_msg, ADC_received_msg, 2, 100);
-//				  ADC_received_msg_16 = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
-//				  sprintf((char*)BT_send_msg_buff, "%d %d    %d\n\r", ADC_received_msg[0], ADC_received_msg[1], ADC_received_msg_16);
-//				  BT_TransmitMsg(&huart2, BT_send_msg_buff);
-//			  }
-//			  leds_on[j] >>= 1;
-//			  LS_LED_Send(&hspi3, leds_on);
-//		  }
-
-
-
-//	  // Check if a bluetooth message has arrived
-//	  if (BTMessageFlag)
-//	  {
-//		  BT_ProcessMsg(BT_received_msg);
-//		  BT_ReceiveMsg(&huart2, BT_received_msg);
-//		  BTMessageFlag = false;
-//	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -499,7 +467,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

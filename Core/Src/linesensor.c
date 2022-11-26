@@ -2,6 +2,9 @@
 
 #include "main.h"
 #include "linesensor.h"
+#include "bluetooth.h"
+#include <string.h>
+#include <stdio.h>
 
 void LS_LED_Send(SPI_HandleTypeDef *hspi, uint8_t *leds_on)
 {
@@ -83,9 +86,19 @@ void LS_ADC_ChipSelect(int CS)
 	}
 }
 
-//uint16_t LS_Run_ADCs(SPI_HandleTypeDef *hspi, ChipSelect CS, uint8_t *ADC_number)
-//{
-//	// Pull down the appropriate Chip Select pins
-//
-//	return (uint16_t)CS;
-//}
+void LS_BT_SendData(UART_HandleTypeDef *huart, unsigned char *BT_send_msg_buff, uint16_t *ADC_values, unsigned char *ADC_value_string)
+{
+	BT_send_msg_buff[0] = '\0';
+	for (int k=0; k<16; k++){
+	  sprintf((char*)ADC_value_string, "%d ", ADC_values[k]);
+	  strcat((char*)BT_send_msg_buff, (char*)ADC_value_string);
+	}
+	BT_TransmitMsg(huart, BT_send_msg_buff);
+	BT_send_msg_buff[0] = '\0';
+	for (int k=16; k<32; k++){
+	  sprintf((char*)ADC_value_string, "%d ", ADC_values[k]);
+	  strcat((char*)BT_send_msg_buff, (char*)ADC_value_string);
+	}
+	strcat((char*)BT_send_msg_buff, "\n\r");
+	BT_TransmitMsg(huart, BT_send_msg_buff);
+}

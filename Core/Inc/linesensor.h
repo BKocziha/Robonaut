@@ -7,6 +7,8 @@ void LS_RUN_4_Leds(SPI_HandleTypeDef *hspi);
 
 void LS_ADC_ChipSelect(int CS);
 
+void LS_BT_SendData(UART_HandleTypeDef *huart, unsigned char *BT_send_msg_buff, uint16_t *ADC_values, unsigned char *ADC_value_string);
+
 //typedef enum {
 //	CS_0000 = 0,
 //	CS_0001 = 1,
