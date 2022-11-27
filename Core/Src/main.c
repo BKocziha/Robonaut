@@ -78,6 +78,7 @@ unsigned char BT_send_msg_buff[200];
 uint8_t ADC_inputs[] = {0, 8, 16, 24, 32, 40, 48, 56};
 uint8_t ADC_received_msg[2];
 uint16_t ADC_received_msg_16;
+double line_pos;
 
 bool lightIsOn = false;
 
@@ -165,8 +166,6 @@ int main(void)
 
   LS_INF_Send(&hspi3, leds_off);
 
-
-  LS_LED_Light(&hspi3, fb_leds_to_light, fb_leds_on);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -176,7 +175,7 @@ int main(void)
 	  // Turn on first set of LEDs
 	  leds_on[0] = 1;leds_on[1] = 1;leds_on[2] = 1;leds_on[3] = 1;
 	  LS_INF_Send(&hspi3, leds_on);
-	  HAL_Delay(10);
+	  HAL_Delay(1);
 	  // Retrieve data from first set of ADCs
 	  for (int i=1; i<5; i++)
 	  {
@@ -194,7 +193,7 @@ int main(void)
 		  leds_on[2] <<= 1;
 		  leds_on[3] <<= 1;
 		  LS_INF_Send(&hspi3, leds_on);
-		  HAL_Delay(10);
+		  HAL_Delay(1);
 
 		  //Retrieve data from the ADCs at the active LEDs
 		  for (int i=1; i<5; i++)
@@ -209,8 +208,21 @@ int main(void)
 
 	  // Valamiért egy UART Transmitban csak a 100. elemig küldi el - Miért lehet?
 	  LS_INF_Send(&hspi3, leds_off);
-	  LS_BT_SendData(&huart2, BT_send_msg_buff, ADC_values, ADC_value_string);
-	  HAL_Delay(100);
+	  //LS_BT_SendData(&huart2, BT_send_msg_buff, ADC_values, ADC_value_string);
+	  //HAL_Delay(100);
+
+	  line_pos = LS_Holavonal_favago(ADC_values);
+	  fb_leds_on[0] = 0;
+	  fb_leds_on[1] = 0;
+	  fb_leds_on[2] = 0;
+	  fb_leds_on[3] = 0;
+	  fb_leds_to_light[0] = (int)line_pos;
+	  //fb_leds_to_light[1] = (int)line_pos+1;
+	  LS_LED_Send(&hspi3, leds_off);
+	  LS_LED_Light(&hspi3, fb_leds_to_light, fb_leds_on);
+
+	  //sprintf((char*)BT_send_msg_buff, "%d %d  %f\n\r", (int)line_pos, (int)line_pos+1, line_pos);
+	  //BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
 
 	  if (buttonMessageFlag){
@@ -453,7 +465,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

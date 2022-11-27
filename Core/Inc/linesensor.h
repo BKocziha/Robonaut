@@ -13,4 +13,8 @@ void LS_ADC_ChipSelect(int CS);
 
 void LS_BT_SendData(UART_HandleTypeDef *huart, unsigned char *BT_send_msg_buff, uint16_t *ADC_values, unsigned char *ADC_value_string);
 
+double LS_Holavonal(uint16_t * ADC_values);
+
+double LS_Holavonal_favago(uint16_t *ADC_values);
+
 #endif

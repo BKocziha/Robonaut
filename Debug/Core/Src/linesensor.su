@@ -4,3 +4,5 @@
 ../Core/Src/linesensor.c:77:6:LS_RUN_4_Leds	32	static
 ../Core/Src/linesensor.c:105:6:LS_ADC_ChipSelect	16	static
 ../Core/Src/linesensor.c:133:6:LS_BT_SendData	32	static
+../Core/Src/linesensor.c:150:8:LS_Holavonal	40	static
+../Core/Src/linesensor.c:163:8:LS_Holavonal_favago	168	static

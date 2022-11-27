@@ -146,3 +146,36 @@ void LS_BT_SendData(UART_HandleTypeDef *huart, unsigned char *BT_send_msg_buff, 
 	strcat((char*)BT_send_msg_buff, "\n\r");
 	BT_TransmitMsg(huart, BT_send_msg_buff);
 }
+
+double LS_Holavonal(uint16_t * ADC_values){
+	double weighted_sum = 0;
+	int sum = 0;
+	double line;
+	for(int i = 0;i<32;i++){
+		weighted_sum += (ADC_values[i]-250)*i;
+		sum += ADC_values[i];
+	}
+	sum -= 32*250;
+	line = (double)weighted_sum/sum;
+	return line;
+}
+
+double LS_Holavonal_favago(uint16_t *ADC_values){
+	int vonal[33] = {50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50,
+								50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50};
+	int k = 0;
+	for(int i=0; i<32; i++){
+		if (ADC_values[i] > 3000){
+			vonal[k] = i;
+			k++;
+		}
+	}
+	int m;
+	int sum = 0;
+	for(m=0; vonal[m]!=50; m++){
+		sum += vonal[m];
+	}
+	if(m == 0)
+		return 0;
+	return sum/m;
+}
