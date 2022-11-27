@@ -1,5 +1,6 @@
-../Core/Src/linesensor.c:9:6:LS_LED_Send	16	static
-../Core/Src/linesensor.c:23:6:LS_INF_Send	16	static
-../Core/Src/linesensor.c:37:6:LS_RUN_4_Leds	32	static
-../Core/Src/linesensor.c:65:6:LS_ADC_ChipSelect	16	static
-../Core/Src/linesensor.c:93:6:LS_BT_SendData	32	static
+../Core/Src/linesensor.c:10:6:LS_LED_Light	48	static
+../Core/Src/linesensor.c:49:6:LS_LED_Send	16	static
+../Core/Src/linesensor.c:63:6:LS_INF_Send	16	static
+../Core/Src/linesensor.c:77:6:LS_RUN_4_Leds	32	static
+../Core/Src/linesensor.c:105:6:LS_ADC_ChipSelect	16	static
+../Core/Src/linesensor.c:133:6:LS_BT_SendData	32	static

@@ -158,12 +158,15 @@ int main(void)
   unsigned char ADC_value_string[10];
   uint8_t leds_on[4];// = {1, 1, 1, 1};
   uint8_t leds_off[] = {0, 0, 0, 0};
-  uint8_t fb_leds_on[4] = 0;
+  uint8_t fb_leds_on[4] = {0};
+  uint8_t fb_leds_to_light[5] = {50, 50, 50, 50, 50};
   //uint8_t leds_all_on[] = {255, 255, 255, 255};
   uint16_t ADC_values[32] = {0};
 
   LS_INF_Send(&hspi3, leds_off);
 
+
+  LS_LED_Light(&hspi3, fb_leds_to_light, fb_leds_on);
   /* USER CODE END 2 */
 
   /* Infinite loop */

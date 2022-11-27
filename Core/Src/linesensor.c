@@ -7,38 +7,43 @@
 #include <stdio.h>
 
 // Az utolsó beadott érték mindig 33-nál nagyobb legyen!
-void LS_LED_Light(uint8_t *leds_to_light, uint8_t *fb_leds_on)
+void LS_LED_Light(SPI_HandleTypeDef *hspi, uint8_t *leds_to_light, uint8_t *fb_leds_on)
 {
-
-	for (int i=0; leds_to_light[i]>33; i++)
+	uint8_t fb_leds_on_temp[4] = {0};
+	for (int i=0; leds_to_light[i]<33; i++)
 	{
 		switch(leds_to_light[i]/8) {
 		case 0:
-			fb_leds_on[0] = 1;
+			fb_leds_on_temp[3] = 1;
 			for (int j=0; j<leds_to_light[i]%8; j++){
-				fb_leds_on[0] <<= 1;
+				fb_leds_on_temp[3] <<= 1;
 			}
+			fb_leds_on[3] |= fb_leds_on_temp[3];
 			break;
 		case 1:
-			fb_leds_on[1] = 1;
+			fb_leds_on_temp[2] = 1;
 			for (int j=0; j<leds_to_light[i]%8; j++){
-				fb_leds_on[1] <<= 1;
+				fb_leds_on_temp[2] <<= 1;
 			}
+			fb_leds_on[2] |= fb_leds_on_temp[2];
 			break;
 		case 2:
-			fb_leds_on[2] = 1;
+			fb_leds_on_temp[1] = 1;
 			for (int j=0; j<leds_to_light[i]%8; j++){
-				fb_leds_on[2] <<= 1;
+				fb_leds_on_temp[1] <<= 1;
 			}
+			fb_leds_on[1] |= fb_leds_on_temp[1];
 			break;
 		case 3:
-			fb_leds_on[3] = 1;
+			fb_leds_on_temp[0] = 1;
 			for (int j=0; j<leds_to_light[i]%8; j++){
-				fb_leds_on[3] <<= 1;
+				fb_leds_on_temp[0] <<= 1;
 			}
+			fb_leds_on[0] |= fb_leds_on_temp[0];
 			break;
 		}
 	}
+	LS_LED_Send(hspi, fb_leds_on);
 }
 
 void LS_LED_Send(SPI_HandleTypeDef *hspi, uint8_t *leds_on)

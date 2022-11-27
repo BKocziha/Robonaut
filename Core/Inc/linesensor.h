@@ -1,6 +1,8 @@
 #ifndef LINESENSOR_H
 #define LINESENSOR_H
 
+void LS_LED_Light(SPI_HandleTypeDef *hspi, uint8_t *leds_to_light, uint8_t *fb_leds_on);
+
 void LS_LED_Send(SPI_HandleTypeDef *hspi, uint8_t *leds_on);
 
 void LS_INF_Send(SPI_HandleTypeDef *hspi, uint8_t *infs_on);
