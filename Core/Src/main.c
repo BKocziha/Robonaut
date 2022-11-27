@@ -74,8 +74,8 @@ UART_HandleTypeDef huart6;
 unsigned char BT_received_msg[20];
 unsigned char BT_send_msg_buff[200];
 
-uint8_t ADC_inputs[] = {ADC_1, ADC_2, ADC_3, ADC_4, ADC_5, ADC_6, ADC_7, ADC_8};
-
+//uint8_t ADC_inputs[] = {ADC_1, ADC_2, ADC_3, ADC_4, ADC_5, ADC_6, ADC_7, ADC_8};
+uint8_t ADC_inputs[] = {0, 8, 16, 24, 32, 40, 48, 56};
 uint8_t ADC_received_msg[2];
 uint16_t ADC_received_msg_16;
 
@@ -158,10 +158,12 @@ int main(void)
   unsigned char ADC_value_string[10];
   uint8_t leds_on[4];// = {1, 1, 1, 1};
   uint8_t leds_off[] = {0, 0, 0, 0};
-  uint8_t leds_all_on[] = {255, 255, 255, 255};
-  uint16_t ADC_values[32];
+  uint8_t fb_leds_on[4] = 0;
+  //uint8_t leds_all_on[] = {255, 255, 255, 255};
+  uint16_t ADC_values[32] = {0};
 
-  LS_LED_Send(&hspi3, leds_off);
+  LS_INF_Send(&hspi3, leds_off);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -170,7 +172,7 @@ int main(void)
   {
 	  // Turn on first set of LEDs
 	  leds_on[0] = 1;leds_on[1] = 1;leds_on[2] = 1;leds_on[3] = 1;
-	  LS_LED_Send(&hspi3, leds_on);
+	  LS_INF_Send(&hspi3, leds_on);
 	  HAL_Delay(10);
 	  // Retrieve data from first set of ADCs
 	  for (int i=1; i<5; i++)
@@ -180,13 +182,15 @@ int main(void)
 		  ADC_values[(i-1)*8] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
 		  LS_ADC_ChipSelect(0);
 	  }
+
+	  // Shift the LEDs by one
 	  for (int k=0; k<7; k++)
 	  {
 		  leds_on[0] <<= 1;
 		  leds_on[1] <<= 1;
 		  leds_on[2] <<= 1;
 		  leds_on[3] <<= 1;
-		  LS_LED_Send(&hspi3, leds_on);
+		  LS_INF_Send(&hspi3, leds_on);
 		  HAL_Delay(10);
 
 		  //Retrieve data from the ADCs at the active LEDs
@@ -194,40 +198,19 @@ int main(void)
 		  {
 			  LS_ADC_ChipSelect(i);
 			  HAL_SPI_TransmitReceive(&hspi1, &ADC_inputs[k+1], ADC_received_msg, 2, 100);
+			  HAL_SPI_TransmitReceive(&hspi1, &ADC_inputs[k+1], ADC_received_msg, 2, 100);
 			  ADC_values[(i-1)*8+k+1] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
 			  LS_ADC_ChipSelect(0);
 		  }
 	  }
 
-
-
-
-
-	  for (int i=1; i<5; i++)
-	  {
-		  LS_ADC_ChipSelect(i);
-		  for (int j=0; j<8; j++){
-			  HAL_SPI_TransmitReceive(&hspi1, &ADC_inputs[j], ADC_received_msg, 2, 100);
-			  ADC_values[(i-1)*8+j] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
-		  }
-		  LS_ADC_ChipSelect(0);
-	  }
-
-
 	  // Valamiért egy UART Transmitban csak a 100. elemig küldi el - Miért lehet?
-	  LS_LED_Send(&hspi3, leds_off);
+	  LS_INF_Send(&hspi3, leds_off);
 	  LS_BT_SendData(&huart2, BT_send_msg_buff, ADC_values, ADC_value_string);
-	  HAL_Delay(10);
+	  HAL_Delay(100);
+
 
 	  if (buttonMessageFlag){
-		  if(lightIsOn){
-			  LS_LED_Send(&hspi3, leds_off);
-			  lightIsOn = false;
-		  }
-		  else{
-			  LS_LED_Send(&hspi3, leds_all_on);
-			  lightIsOn = true;
-		  }
 		  buttonMessageFlag = false;
 	  }
     /* USER CODE END WHILE */
@@ -467,7 +450,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

@@ -6,6 +6,41 @@
 #include <string.h>
 #include <stdio.h>
 
+// Az utolsó beadott érték mindig 33-nál nagyobb legyen!
+void LS_LED_Light(uint8_t *leds_to_light, uint8_t *fb_leds_on)
+{
+
+	for (int i=0; leds_to_light[i]>33; i++)
+	{
+		switch(leds_to_light[i]/8) {
+		case 0:
+			fb_leds_on[0] = 1;
+			for (int j=0; j<leds_to_light[i]%8; j++){
+				fb_leds_on[0] <<= 1;
+			}
+			break;
+		case 1:
+			fb_leds_on[1] = 1;
+			for (int j=0; j<leds_to_light[i]%8; j++){
+				fb_leds_on[1] <<= 1;
+			}
+			break;
+		case 2:
+			fb_leds_on[2] = 1;
+			for (int j=0; j<leds_to_light[i]%8; j++){
+				fb_leds_on[2] <<= 1;
+			}
+			break;
+		case 3:
+			fb_leds_on[3] = 1;
+			for (int j=0; j<leds_to_light[i]%8; j++){
+				fb_leds_on[3] <<= 1;
+			}
+			break;
+		}
+	}
+}
+
 void LS_LED_Send(SPI_HandleTypeDef *hspi, uint8_t *leds_on)
 {
 	// Send bits with SPI
@@ -18,9 +53,12 @@ void LS_LED_Send(SPI_HandleTypeDef *hspi, uint8_t *leds_on)
 	//Output enable
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_RESET);
+}
 
+void LS_INF_Send(SPI_HandleTypeDef *hspi, uint8_t *infs_on)
+{
 	// Send bits with SPI
-	HAL_SPI_Transmit(hspi, leds_on, 4, 100);
+	HAL_SPI_Transmit(hspi, infs_on, 4, 100);
 
 	// Inf Latch enable
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
@@ -78,11 +116,12 @@ void LS_ADC_ChipSelect(int CS)
 		break;
 	case 4:
 		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+		break;
 	default:
 		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
 	}
 }
 
