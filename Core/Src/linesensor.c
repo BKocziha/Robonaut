@@ -161,21 +161,35 @@ double LS_Holavonal(uint16_t * ADC_values){
 }
 
 double LS_Holavonal_favago(uint16_t *ADC_values){
-	int vonal[33] = {50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50,
-								50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50};
-	int k = 0;
-	for(int i=0; i<32; i++){
-		if (ADC_values[i] > 3000){
-			vonal[k] = i;
-			k++;
-		}
-	}
-	int m;
-	int sum = 0;
-	for(m=0; vonal[m]!=50; m++){
-		sum += vonal[m];
-	}
-	if(m == 0)
-		return 0;
-	return sum/m;
+    int m = 0;
+    int sum = 0;
+    for(int i=0; i<32; i++){
+        if (ADC_values[i] > 3000){
+            sum += i;
+            m++;
+        }
+    }
+    if(m == 0)
+        return 0;
+    return sum/m;
 }
+
+//double LS_Holavonal_favago(uint16_t *ADC_values){
+//	int vonal[33] = {50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50,
+//								50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50};
+//	int k = 0;
+//	for(int i=0; i<32; i++){
+//		if (ADC_values[i] > 3000){
+//			vonal[k] = i;
+//			k++;
+//		}
+//	}
+//	int m;
+//	int sum = 0;
+//	for(m=0; vonal[m]!=50; m++){
+//		sum += vonal[m];
+//	}
+//	if(m == 0)
+//		return 0;
+//	return sum/m;
+//}
