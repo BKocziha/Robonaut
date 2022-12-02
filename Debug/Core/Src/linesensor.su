@@ -7,8 +7,8 @@
 ../Core/Src/linesensor.c:149:7:LS_Holavonal	48	static
 ../Core/Src/linesensor.c:162:7:LS_Holavonal_favago	32	static
 ../Core/Src/linesensor.c:176:6:LineSensor_FrontOnly	64	static
-../Core/Src/linesensor.c:220:6:LineSensor_FrontAndBack	272	static
-../Core/Src/linesensor.c:295:6:LS_feedback_all	40	static
-../Core/Src/linesensor.c:311:6:LS_feedback_led	40	static
-../Core/Src/linesensor.c:328:7:LS_delta_angle	24	static
-../Core/Src/linesensor.c:335:7:LS_p	48	static
+../Core/Src/linesensor.c:220:6:LineSensor_FrontAndBack	72	static
+../Core/Src/linesensor.c:297:6:LS_feedback_all	40	static
+../Core/Src/linesensor.c:313:6:LS_feedback_led	40	static
+../Core/Src/linesensor.c:330:7:LS_delta_angle	24	static
+../Core/Src/linesensor.c:337:7:LS_p	48	static

@@ -236,6 +236,7 @@ void LineSensor_FrontAndBack(UART_HandleTypeDef *huart, SPI_HandleTypeDef *hspi_
 	{
 	  LS_ADC_ChipSelect(i);
 	  HAL_SPI_TransmitReceive(hspi_sense_front, &ADC_inputs[0], ADC_received_msg, 2, 100);
+	  HAL_SPI_TransmitReceive(hspi_sense_front, &ADC_inputs[0], ADC_received_msg, 2, 100);
 	  ADC_values_front[(i-1)*8] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
 	  LS_ADC_ChipSelect(0);
 	}
@@ -244,7 +245,8 @@ void LineSensor_FrontAndBack(UART_HandleTypeDef *huart, SPI_HandleTypeDef *hspi_
 	for (int i=1; i<5; i++)
 	{
 	  LS_ADC_ChipSelect(i);
-	  HAL_SPI_TransmitReceive(hspi_sense_front, &ADC_inputs[0], ADC_received_msg, 2, 100);
+	  HAL_SPI_TransmitReceive(hspi_sense_rear, &ADC_inputs[0], ADC_received_msg, 2, 100);
+	  HAL_SPI_TransmitReceive(hspi_sense_rear, &ADC_inputs[0], ADC_received_msg, 2, 100);
 	  ADC_values_rear[(i-1)*8] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
 	  LS_ADC_ChipSelect(0);
 	}
@@ -287,9 +289,9 @@ void LineSensor_FrontAndBack(UART_HandleTypeDef *huart, SPI_HandleTypeDef *hspi_
 //		if (ADC_values_rear[i] > line_pos[0])
 //			line_pos[0] = ADC_values_rear[i];
 //	}
-	unsigned char BT_send_msg_buff[200];
 
-	LS_BT_SendData(huart, BT_send_msg_buff, ADC_values_rear);
+//	unsigned char BT_send_msg_buff[200];
+//	LS_BT_SendData(huart, BT_send_msg_buff, ADC_values_rear);
 }
 
 void LS_feedback_all(SPI_HandleTypeDef *hspi_led, uint16_t *ADC_values)

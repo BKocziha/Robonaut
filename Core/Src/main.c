@@ -182,7 +182,7 @@ int main(void)
 	  LineSensor_FrontAndBack(&huart2, &hspi3, &hspi1, &hspi2, ADC_values_front, ADC_values_rear);
 	  line_pos[0] = LS_Holavonal_favago(ADC_values_front);
 	  line_pos[1] = LS_Holavonal_favago(ADC_values_rear);
-	  LS_feedback_all(&hspi3, ADC_values_front);
+	  LS_feedback_all(&hspi3, ADC_values_rear);
 	  //LS_feedback_led(&hspi3, line_pos, feedback_rear);
 
 	  delta = LS_delta_angle(line_pos[0], line_pos[1]);
