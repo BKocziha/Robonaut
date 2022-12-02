@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -163,8 +164,11 @@ int main(void)
   //uint8_t fb_leds_to_light[5] = {50, 50, 50, 50, 50};
   //uint8_t leds_all_on[] = {255, 255, 255, 255};
   //uint16_t ADC_values[32] = {0};
+  uint16_t ADC_values_front[32] = {0};
+  uint16_t ADC_values_rear[32] = {0};
   float line_pos[2];
   bool feedback_rear = false;
+  float delta, p;
 
   //LS_INF_Send(&hspi3, leds_off);
 
@@ -175,10 +179,18 @@ int main(void)
   while (1)
   {
 	  //LineSensor_FrontOnly(&hspi3, &hspi1);
-	  LineSensor_FrontAndBack(&huart2, &hspi3, &hspi1, &hspi2, line_pos, feedback_rear);
+	  LineSensor_FrontAndBack(&huart2, &hspi3, &hspi1, &hspi2, ADC_values_front, ADC_values_rear);
+	  line_pos[0] = LS_Holavonal_favago(ADC_values_front);
+	  line_pos[1] = LS_Holavonal_favago(ADC_values_rear);
+	  LS_feedback_all(&hspi3, ADC_values_front);
+	  //LS_feedback_led(&hspi3, line_pos, feedback_rear);
 
-	  //sprintf((char*)BT_send_msg_buff, "%f \n\r", line_pos[0]);
-	  //BT_TransmitMsg(&huart2, BT_send_msg_buff);
+	  delta = LS_delta_angle(line_pos[0], line_pos[1]);
+
+	  p = LS_p(line_pos[0],line_pos[1],delta);
+
+//	  sprintf((char*)BT_send_msg_buff, "elso: %f, hatso: %f ,delta: %f, p: %f\n\r", line_pos[0], line_pos[1],delta,p);
+//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
 	  if (buttonMessageFlag){
 		  if (feedback_rear)
@@ -462,7 +474,7 @@ static void MX_SPI2_Init(void)
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -500,7 +512,7 @@ static void MX_SPI3_Init(void)
   hspi3.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi3.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi3.Init.NSS = SPI_NSS_SOFT;
-  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
   hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi3.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi3.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

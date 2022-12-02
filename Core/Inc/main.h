@@ -112,6 +112,7 @@ void Error_Handler(void);
 #define DRV_PWM2_GPIO_Port GPIOB
 #define ENCODER_B_Pin GPIO_PIN_9
 #define ENCODER_B_GPIO_Port GPIOB
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

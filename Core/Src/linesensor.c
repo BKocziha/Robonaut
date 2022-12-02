@@ -6,10 +6,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h>
 
 // Az utolsó beadott érték mindig 33-nál nagyobb legyen!
-void LS_LED_Light(SPI_HandleTypeDef *hspi, uint8_t *leds_to_light, uint8_t *fb_leds_on)
+void LS_LED_Light(SPI_HandleTypeDef *hspi, uint8_t *leds_to_light)
 {
+	uint8_t fb_leds_on[4] = {0};
 	uint8_t fb_leds_on_temp[4] = {0};
 	for (int i=0; leds_to_light[i]<33; i++)
 	{
@@ -161,7 +163,7 @@ float LS_Holavonal_favago(uint16_t *ADC_values){
     int m = 0;
     int sum = 0;
     for(int i=0; i<32; i++){
-        if (ADC_values[i] > 2900){
+        if (ADC_values[i] > 2500){
             sum += i;
             m++;
         }
@@ -171,16 +173,12 @@ float LS_Holavonal_favago(uint16_t *ADC_values){
     return sum/m;
 }
 
-float LineSensor_FrontOnly(SPI_HandleTypeDef *hspi_led, SPI_HandleTypeDef *hspi_sense)
+void LineSensor_FrontOnly(UART_HandleTypeDef *huart, SPI_HandleTypeDef *hspi_led, SPI_HandleTypeDef *hspi_sense_front,
+		uint16_t *ADC_values_front)
 {
-	uint8_t leds_on[4];// = {1, 1, 1, 1};
-	uint8_t leds_off[] = {0, 0, 0, 0};
-	uint8_t fb_leds_on[4] = {0};
-	uint8_t fb_leds_to_light[5] = {50, 50, 50, 50, 50};
-	uint16_t ADC_values[32] = {0};
+	uint8_t leds_on[4];
 	uint8_t ADC_inputs[] = {0, 8, 16, 24, 32, 40, 48, 56};
 	uint8_t ADC_received_msg[2];
-	float line_pos;
 
 	//LS_INF_Send(&hspi3, leds_off);
 
@@ -192,8 +190,8 @@ float LineSensor_FrontOnly(SPI_HandleTypeDef *hspi_led, SPI_HandleTypeDef *hspi_
 	for (int i=1; i<5; i++)
 	{
 	  LS_ADC_ChipSelect(i);
-	  HAL_SPI_TransmitReceive(hspi_sense, &ADC_inputs[0], ADC_received_msg, 2, 100);
-	  ADC_values[(i-1)*8] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
+	  HAL_SPI_TransmitReceive(hspi_sense_front, &ADC_inputs[0], ADC_received_msg, 2, 100);
+	  ADC_values_front[(i-1)*8] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
 	  LS_ADC_ChipSelect(0);
 	}
 
@@ -211,33 +209,19 @@ float LineSensor_FrontOnly(SPI_HandleTypeDef *hspi_led, SPI_HandleTypeDef *hspi_
 	  for (int i=1; i<5; i++)
 	  {
 		  LS_ADC_ChipSelect(i);
-		  HAL_SPI_TransmitReceive(hspi_sense, &ADC_inputs[k+1], ADC_received_msg, 2, 100);
-		  HAL_SPI_TransmitReceive(hspi_sense, &ADC_inputs[k+1], ADC_received_msg, 2, 100);
-		  ADC_values[(i-1)*8+k+1] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
+		  HAL_SPI_TransmitReceive(hspi_sense_front, &ADC_inputs[k+1], ADC_received_msg, 2, 100);
+		  HAL_SPI_TransmitReceive(hspi_sense_front, &ADC_inputs[k+1], ADC_received_msg, 2, 100);
+		  ADC_values_front[(i-1)*8+k+1] = ADC_received_msg[1] | (ADC_received_msg[0] << 8);
 		  LS_ADC_ChipSelect(0);
 	  }
 	}
-
-	line_pos = LS_Holavonal_favago(ADC_values);
-	fb_leds_on[0] = 0;
-	fb_leds_on[1] = 0;
-	fb_leds_on[2] = 0;
-	fb_leds_on[3] = 0;
-	fb_leds_to_light[0] = (int)line_pos;
-	fb_leds_to_light[1] = (int)line_pos+1; // ?
-	LS_LED_Send(hspi_led, leds_off);
-	LS_LED_Light(hspi_led, fb_leds_to_light, fb_leds_on);
-	return line_pos;
 }
 
-float *LineSensor_FrontAndBack(UART_HandleTypeDef *huart, SPI_HandleTypeDef *hspi_led, SPI_HandleTypeDef *hspi_sense_front, SPI_HandleTypeDef *hspi_sense_rear, float *line_pos, bool feedback_rear)
+void LineSensor_FrontAndBack(UART_HandleTypeDef *huart, SPI_HandleTypeDef *hspi_led, SPI_HandleTypeDef *hspi_sense_front,
+		SPI_HandleTypeDef *hspi_sense_rear, uint16_t *ADC_values_front, uint16_t *ADC_values_rear)
 {
 	uint8_t leds_on[4];// = {1, 1, 1, 1};
-	uint8_t leds_off[] = {0, 0, 0, 0};
-	uint8_t fb_leds_on[4] = {0};
-	uint8_t fb_leds_to_light[5] = {50, 50, 50, 50, 50};
-	uint16_t ADC_values_front[32] = {0};
-	uint16_t ADC_values_rear[32] = {0};
+
 	uint8_t ADC_inputs[] = {0, 8, 16, 24, 32, 40, 48, 56};
 	uint8_t ADC_received_msg[2];
 
@@ -306,14 +290,29 @@ float *LineSensor_FrontAndBack(UART_HandleTypeDef *huart, SPI_HandleTypeDef *hsp
 	unsigned char BT_send_msg_buff[200];
 
 	LS_BT_SendData(huart, BT_send_msg_buff, ADC_values_rear);
+}
 
+void LS_feedback_all(SPI_HandleTypeDef *hspi_led, uint16_t *ADC_values)
+{
+	uint8_t fb_leds_to_light[5] = {50, 50, 50, 50, 50};
+	uint8_t leds_off[4] = {0};
+	int j = 0;
+		for (int i=0; i<32; i++){
+			if (ADC_values[i]>2500){
+				fb_leds_to_light[j] = i;
+				j++;
+			}
+		}
 
-	line_pos[0] = LS_Holavonal_favago(ADC_values_front);
-	line_pos[1] = LS_Holavonal_favago(ADC_values_rear);
-	fb_leds_on[0] = 0;
-	fb_leds_on[1] = 0;
-	fb_leds_on[2] = 0;
-	fb_leds_on[3] = 0;
+	LS_LED_Send(hspi_led, leds_off);
+	LS_LED_Light(hspi_led, fb_leds_to_light);
+}
+
+void LS_feedback_led(SPI_HandleTypeDef *hspi_led, float *line_pos, bool feedback_rear)
+{
+	uint8_t fb_leds_to_light[5] = {50, 50, 50, 50, 50};
+	uint8_t leds_off[4] = {0};
+
 	if (feedback_rear){
 		fb_leds_to_light[0] = (int)line_pos[1];
 		fb_leds_to_light[1] = (int)line_pos[1]+1; // ?
@@ -323,6 +322,31 @@ float *LineSensor_FrontAndBack(UART_HandleTypeDef *huart, SPI_HandleTypeDef *hsp
 		fb_leds_to_light[1] = (int)line_pos[0]+1; // ?
 	}
 	LS_LED_Send(hspi_led, leds_off);
-	LS_LED_Light(hspi_led, fb_leds_to_light, fb_leds_on);
-	return line_pos;
+	LS_LED_Light(hspi_led, fb_leds_to_light);
+}
+
+float LS_delta_angle(float p1, float p2){
+    float delta = atan((p2-(31-p1))*6.5/460);
+    return delta;
+}
+
+
+
+float LS_p(float f1, float f2, float delta){
+    float x = 0;
+    float p1 = 15.5-f1;//-15.5;
+    float p2 = f2-15.5;
+
+
+    if(p1*p2 < 0 && fabs(p2/p1) < 3.6){x = fabs(p1/p2)*460-100;}
+    if(fabs(p2/p1)==3.6){x = 0;}
+    if(p1*p2 < 0 && fabs(p2/p1) > 3.6){x = 100-fabs(p1/p2)*460;}
+    if(p1/p2 > 1){x = p2/(p1-p2)*460-100; }
+    if(p2/p1 > 1){x = 460/(1-p1/p2)-360;}
+    if(p2 == 0){x = 360;}
+    if(p1 == 0){x = 100;}
+
+
+    float p = sin(delta)*x;
+    return p;
 }
