@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "bluetooth.h"
 #include "linesensor.h"
+#include "servo.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -66,6 +67,7 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
+TIM_HandleTypeDef htim7;
 TIM_HandleTypeDef htim13;
 
 UART_HandleTypeDef huart2;
@@ -81,7 +83,14 @@ unsigned char BT_send_msg_buff[200];
 //uint16_t ADC_received_msg_16;
 //double line_pos;
 
+uint8_t leds_off[] = {0, 0, 0, 0};
+uint8_t leds_all_on[] = {255, 255, 255, 255};
 bool lightIsOn = false;
+int MA_sum_front = 0;
+int MA_sum_rear = 0;
+int summ, summ2;
+enum circuit_section {Slow_section, Fast_section};
+
 
 // Flags
 bool BTMessageFlag = false;
@@ -105,6 +114,7 @@ static void MX_TIM5_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART6_UART_Init(void);
+static void MX_TIM7_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -156,21 +166,25 @@ int main(void)
   MX_I2C2_Init();
   MX_USART2_UART_Init();
   MX_USART6_UART_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
   //unsigned char ADC_value_string[10];
   //uint8_t leds_on[4];// = {1, 1, 1, 1};
-  //uint8_t leds_off[] = {0, 0, 0, 0};
   //uint8_t fb_leds_on[4] = {0};
   //uint8_t fb_leds_to_light[5] = {50, 50, 50, 50, 50};
-  //uint8_t leds_all_on[] = {255, 255, 255, 255};
-  //uint16_t ADC_values[32] = {0};
   uint16_t ADC_values_front[32] = {0};
   uint16_t ADC_values_rear[32] = {0};
   float line_pos[2];
   bool feedback_rear = false;
   float delta, p;
-
+  enum circuit_section circuit_Section;
+  circuit_Section = Fast_section;
   //LS_INF_Send(&hspi3, leds_off);
+
+  // kb. 3 másodpercenkétn előidéz egy interruptot
+  HAL_TIM_Base_Start_IT(&htim7);
+
+  HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
 
   /* USER CODE END 2 */
 
@@ -178,19 +192,32 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  //LineSensor_FrontOnly(&hspi3, &hspi1);
+
+	  ServoPosition(&htim5, 90);
+
+//	  //LineSensor_FrontOnly(&hspi3, &hspi1);
 	  LineSensor_FrontAndBack(&huart2, &hspi3, &hspi1, &hspi2, ADC_values_front, ADC_values_rear);
-	  line_pos[0] = LS_Holavonal_favago(ADC_values_front);
-	  line_pos[1] = LS_Holavonal_favago(ADC_values_rear);
-	  LS_feedback_all(&hspi3, ADC_values_rear);
-	  //LS_feedback_led(&hspi3, line_pos, feedback_rear);
+	  line_pos[0] = LS_Holavonal_favago(ADC_values_front, &summ, &MA_sum_front);
+	  line_pos[1] = LS_Holavonal_favago(ADC_values_rear, &summ2, &MA_sum_rear);
+//	  LS_feedback_all(&hspi3, ADC_values_front);
+//	  //LS_feedback_led(&hspi3, line_pos, feedback_rear);
+//
+//	  delta = LS_delta_angle(line_pos[0], line_pos[1]);
+//
+//	  p = LS_p(line_pos[0],line_pos[1],delta);
 
-	  delta = LS_delta_angle(line_pos[0], line_pos[1]);
-
-	  p = LS_p(line_pos[0],line_pos[1],delta);
-
-//	  sprintf((char*)BT_send_msg_buff, "elso: %f, hatso: %f ,delta: %f, p: %f\n\r", line_pos[0], line_pos[1],delta,p);
-//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+	  if (circuit_Section == Fast_section)
+	  {
+		  if (MA_sum_front > 15000){
+			  circuit_Section = Slow_section;
+		  }
+		  sprintf((char*)BT_send_msg_buff, "FAST SECTION,  sum: %d, MA_sum_front: %d\n\r", summ, MA_sum_front);
+	  }
+	  if (circuit_Section == Slow_section)
+	  {
+		  sprintf((char*)BT_send_msg_buff, "SLOW SECTION,  sum: %d, MA_sum_front: %d\n\r", summ, MA_sum_front);
+	  }
+	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
 	  if (buttonMessageFlag){
 		  if (feedback_rear)
@@ -686,6 +713,7 @@ static void MX_TIM5_Init(void)
 
   /* USER CODE END TIM5_Init 0 */
 
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_OC_InitTypeDef sConfigOC = {0};
 
@@ -693,11 +721,20 @@ static void MX_TIM5_Init(void)
 
   /* USER CODE END TIM5_Init 1 */
   htim5.Instance = TIM5;
-  htim5.Init.Prescaler = 0;
+  htim5.Init.Prescaler = 30-1;
   htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim5.Init.Period = 4294967295;
+  htim5.Init.Period = 60000-1;
   htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim5, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
   if (HAL_TIM_PWM_Init(&htim5) != HAL_OK)
   {
     Error_Handler();
@@ -720,6 +757,44 @@ static void MX_TIM5_Init(void)
 
   /* USER CODE END TIM5_Init 2 */
   HAL_TIM_MspPostInit(&htim5);
+
+}
+
+/**
+  * @brief TIM7 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM7_Init(void)
+{
+
+  /* USER CODE BEGIN TIM7_Init 0 */
+
+  /* USER CODE END TIM7_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM7_Init 1 */
+
+  /* USER CODE END TIM7_Init 1 */
+  htim7.Instance = TIM7;
+  htim7.Init.Prescaler = 10000-1;
+  htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim7.Init.Period = 30000-1;
+  htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim7, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM7_Init 2 */
+
+  /* USER CODE END TIM7_Init 2 */
 
 }
 
@@ -927,6 +1002,21 @@ static void MX_GPIO_Init(void)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	buttonMessageFlag = true;
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+//	if (htim == &htim7)
+//	{
+//		if (lightIsOn){
+//			LS_LED_Send(&hspi3, leds_off);
+//			lightIsOn = false;
+//		}
+//		else{
+//			LS_LED_Send(&hspi3, leds_all_on);
+//			lightIsOn = true;
+//		}
+//	}
 }
 
 /* USER CODE END 4 */

@@ -5,10 +5,10 @@
 ../Core/Src/linesensor.c:108:6:LS_ADC_ChipSelect	16	static
 ../Core/Src/linesensor.c:131:6:LS_BT_SendData	56	static
 ../Core/Src/linesensor.c:149:7:LS_Holavonal	48	static
-../Core/Src/linesensor.c:162:7:LS_Holavonal_favago	32	static
-../Core/Src/linesensor.c:176:6:LineSensor_FrontOnly	64	static
-../Core/Src/linesensor.c:220:6:LineSensor_FrontAndBack	72	static
-../Core/Src/linesensor.c:297:6:LS_feedback_all	40	static
-../Core/Src/linesensor.c:313:6:LS_feedback_led	40	static
-../Core/Src/linesensor.c:330:7:LS_delta_angle	24	static
-../Core/Src/linesensor.c:337:7:LS_p	48	static
+../Core/Src/linesensor.c:162:7:LS_Holavonal_favago	40	static
+../Core/Src/linesensor.c:180:6:LineSensor_FrontOnly	64	static
+../Core/Src/linesensor.c:224:6:LineSensor_FrontAndBack	72	static
+../Core/Src/linesensor.c:301:6:LS_feedback_all	40	static
+../Core/Src/linesensor.c:317:6:LS_feedback_led	40	static
+../Core/Src/linesensor.c:334:7:LS_delta_angle	24	static
+../Core/Src/linesensor.c:341:7:LS_p	48	static

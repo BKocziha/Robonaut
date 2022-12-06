@@ -159,15 +159,19 @@ float LS_Holavonal(uint16_t * ADC_values){
 	return line;
 }
 
-float LS_Holavonal_favago(uint16_t *ADC_values){
+float LS_Holavonal_favago(uint16_t *ADC_values, int* summ, int* MA_sum){
     int m = 0;
     int sum = 0;
+    float alpha = 0.1;
+    *summ = 0;
     for(int i=0; i<32; i++){
         if (ADC_values[i] > 2500){
+        	*summ += ADC_values[i];
             sum += i;
             m++;
         }
     }
+    *MA_sum = alpha * *summ + (1-alpha) * *MA_sum;
     if(m == 0)
         return 0;
     return sum/m;
