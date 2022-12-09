@@ -7,3 +7,11 @@ void ServoPosition(TIM_HandleTypeDef* const pwmHandle, double    angle){
     //angle2CCR = ((angle/180+1)/20*60000);
     pwmHandle->Instance->CCR1 = (int)((angle/180+1)/20*60000);//angle2CCR;
 }
+
+
+float SteeringAngle(float p, float delta){
+	kp=-1.159;
+	kd=-0.7812;
+	float phi = atan(0.7826*tan(-kp*p-kd*delta));
+	return phi;
+}

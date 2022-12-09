@@ -338,21 +338,7 @@ float LS_delta_angle(float p1, float p2){
 
 
 
-float LS_p(float f1, float f2, float delta){
-    float x = 0;
-    float p1 = 15.5-f1;//-15.5;
-    float p2 = f2-15.5;
-
-
-    if(p1*p2 < 0 && fabs(p2/p1) < 3.6){x = fabs(p1/p2)*460-100;}
-    if(fabs(p2/p1)==3.6){x = 0;}
-    if(p1*p2 < 0 && fabs(p2/p1) > 3.6){x = 100-fabs(p1/p2)*460;}
-    if(p1/p2 > 1){x = p2/(p1-p2)*460-100; }
-    if(p2/p1 > 1){x = 460/(1-p1/p2)-360;}
-    if(p2 == 0){x = 360;}
-    if(p1 == 0){x = 100;}
-
-
-    float p = sin(delta)*x;
+float LS_p(float f1){
+    float p = (15.5-f1)*0.0065;//m-ben adja vissza a p-t
     return p;
 }
