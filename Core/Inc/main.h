@@ -62,6 +62,8 @@ void Error_Handler(void);
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
 #define B1_EXTI_IRQn EXTI15_10_IRQn
+#define Dead_man_SW_Pin GPIO_PIN_0
+#define Dead_man_SW_GPIO_Port GPIOC
 #define RC_PWM2_Pin GPIO_PIN_0
 #define RC_PWM2_GPIO_Port GPIOA
 #define IMotor_Pin GPIO_PIN_1
@@ -100,8 +102,6 @@ void Error_Handler(void);
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
-#define ENCODER_A_Pin GPIO_PIN_15
-#define ENCODER_A_GPIO_Port GPIOA
 #define LED_LE_Pin GPIO_PIN_11
 #define LED_LE_GPIO_Port GPIOC
 #define LED_OE_Pin GPIO_PIN_2
@@ -110,8 +110,6 @@ void Error_Handler(void);
 #define DRV_PMW1_GPIO_Port GPIOB
 #define DRV_PWM2_Pin GPIO_PIN_6
 #define DRV_PWM2_GPIO_Port GPIOB
-#define ENCODER_B_Pin GPIO_PIN_9
-#define ENCODER_B_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
