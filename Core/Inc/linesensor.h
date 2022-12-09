@@ -17,7 +17,7 @@ void LS_BT_SendData(UART_HandleTypeDef *huart, unsigned char *BT_send_msg_buff, 
 
 float LS_Holavonal(uint16_t * ADC_values);
 
-float LS_Holavonal_favago(uint16_t *ADC_values, int* summ, int* MA_sum);
+float LS_Holavonal_favago(uint16_t *ADC_values, int prev_value, int* summ, int* MA_sum);
 
 void LineSensor_FrontOnly(UART_HandleTypeDef *huart, SPI_HandleTypeDef *hspi_led, SPI_HandleTypeDef *hspi_sense_front,
 		uint16_t *ADC_values_front);

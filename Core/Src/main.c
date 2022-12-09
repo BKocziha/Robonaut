@@ -254,8 +254,8 @@ int main(void)
   while (1)
   {
 	  LineSensor_FrontAndBack(&huart2, &hspi3, &hspi1, &hspi2, ADC_values_front, ADC_values_rear);
-	  line_pos[0] = LS_Holavonal_favago(ADC_values_front, &summ, &MA_sum_front);
-	  line_pos[1] = LS_Holavonal_favago(ADC_values_rear, &summ2, &MA_sum_rear);
+	  line_pos[0] = LS_Holavonal_favago(ADC_values_front, line_pos[0], &summ, &MA_sum_front);
+	  line_pos[1] = LS_Holavonal_favago(ADC_values_rear, line_pos[1], &summ2, &MA_sum_rear);
 	  LS_feedback_all(&hspi3, ADC_values_front);
 //	  //LS_feedback_led(&hspi3, line_pos, feedback_rear);
 
@@ -270,7 +270,7 @@ int main(void)
 		  }
 	  else
 		  HAL_GPIO_WritePin(DRV_EN_GPIO_Port, DRV_EN_Pin, GPIO_PIN_RESET);
-	  //sprintf((char*)BT_send_msg_buff, "Duty MA: %f\n\r", duty_MA);
+	  //sprintf((char*)BT_send_msg_buff, "steering angle: %f \n\r", str_angle);
 	  //BT_TransmitMsg(&huart2, BT_send_msg_buff);
 	  HAL_Delay(1);
 
