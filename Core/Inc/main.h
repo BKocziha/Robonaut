@@ -74,6 +74,9 @@ void Error_Handler(void);
 #define RC_PWM_GPIO_Port GPIOA
 #define DRV_PWR_FB_Pin GPIO_PIN_4
 #define DRV_PWR_FB_GPIO_Port GPIOC
+#define I2C_INT_Pin GPIO_PIN_5
+#define I2C_INT_GPIO_Port GPIOC
+#define I2C_INT_EXTI_IRQn EXTI9_5_IRQn
 #define ToF_XSDN_36_Pin GPIO_PIN_0
 #define ToF_XSDN_36_GPIO_Port GPIOB
 #define ToF_XSDN_25_Pin GPIO_PIN_1

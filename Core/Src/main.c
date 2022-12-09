@@ -93,6 +93,11 @@ int MA_sum_rear = 0;
 int summ, summ2;
 enum circuit_section {Slow_section, Fast_section};
 
+// Initialize ToF
+VL53L1_RangingMeasurementData_t RangingData;
+VL53L1_Dev_t  vl53l1_1; // ToF1
+VL53L1_DEV    Dev1 = &vl53l1_1;
+uint8_t DataReady;
 
 // Flags
 bool BTMessageFlag = false;
@@ -179,26 +184,20 @@ int main(void)
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 
-//  // Initialize ToF
-//  VL53L1_RangingMeasurementData_t RangingData;
-//  VL53L1_Dev_t  vl53l1_1; // ToF1
-//  VL53L1_DEV    Dev1 = &vl53l1_1;
-//  uint8_t DataReady;
-//
-//  // initialize vl53l1x communication parameters
-//  Dev1->I2cHandle = &hi2c2;
-//  Dev1->I2cDevAddr = 0x52;
+  // initialize vl53l1x communication parameters
+  Dev1->I2cHandle = &hi2c2;
+  Dev1->I2cDevAddr = 0x52;
 
 //  // all ToF reset
 //  HAL_GPIO_WritePin(XSHUT2_GPIO_Port, XSHUT2_Pin, GPIO_PIN_RESET);
 //  HAL_Delay(2); // 2ms reset time
 //  HAL_GPIO_WritePin(XSHUT1_GPIO_Port, XSHUT1_Pin, GPIO_PIN_RESET);
 //  HAL_Delay(2); // 2ms reset time
-//
+
   // set ToF1
   HAL_GPIO_WritePin(ToF_XSDN_36_GPIO_Port, ToF_XSDN_36_Pin, GPIO_PIN_SET);
   HAL_Delay(2);
-//
+
 //  // set the address of ToF1
 //  VL53L1_SetDeviceAddress  ( Dev1,  0x42 ); // Dev1 new address 0x42
 //  HAL_Delay(10);
@@ -215,13 +214,13 @@ int main(void)
 
   /*** VL53L1X Initialization ***/
   // Dev1
-//  VL53L1_WaitDeviceBooted( Dev1 );
-//  VL53L1_DataInit( Dev1 );
-//  VL53L1_StaticInit( Dev1 );
-//  VL53L1_SetDistanceMode( Dev1, VL53L1_DISTANCEMODE_LONG );
-//  VL53L1_SetMeasurementTimingBudgetMicroSeconds( Dev1, 50000 );
-//  VL53L1_SetInterMeasurementPeriodMilliSeconds( Dev1, 500 );
-//  VL53L1_StartMeasurement( Dev1 );
+  VL53L1_WaitDeviceBooted( Dev1 );
+  VL53L1_DataInit( Dev1 );
+  VL53L1_StaticInit( Dev1 );
+  VL53L1_SetDistanceMode( Dev1, VL53L1_DISTANCEMODE_LONG );
+  VL53L1_SetMeasurementTimingBudgetMicroSeconds( Dev1, 50000 );
+  VL53L1_SetInterMeasurementPeriodMilliSeconds( Dev1, 100 );
+  VL53L1_StartMeasurement( Dev1 );
 
 
 
@@ -254,6 +253,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+
 	  LineSensor_FrontAndBack(&huart2, &hspi3, &hspi1, &hspi2, ADC_values_front, ADC_values_rear);
 	  line_pos[0] = LS_Holavonal_favago(ADC_values_front, line_pos[0], &summ, &MA_sum_front);
 	  line_pos[1] = LS_Holavonal_favago(ADC_values_rear, line_pos[1], &summ2, &MA_sum_rear);
@@ -264,8 +265,8 @@ int main(void)
 	  p = LS_p(line_pos[0]);
 	  str_angle = SteeringAngle(p, delta);
 
-	  pwm_val = MotorDrive(&htim4, duty_motor);
-	  ServoPosition(&htim5, str_angle);
+	  //pwm_val = MotorDrive(&htim4, duty_motor);
+	  //ServoPosition(&htim5, str_angle);
 	  if(duty_MA>9.5){
 		  HAL_GPIO_WritePin(DRV_EN_GPIO_Port, DRV_EN_Pin, GPIO_PIN_SET);
 		  }
@@ -297,12 +298,6 @@ int main(void)
 //		  buttonMessageFlag = false;
 //	  }
 
-
-//	  VL53L1_WaitMeasurementDataReady(Dev1);
-//      VL53L1_GetRangingMeasurementData( Dev1, &RangingData );
-//      sprintf( (char*)BT_send_msg_buff, "ToF1: %d, %d, %.2f, %.2f\n\r", RangingData.RangeStatus, RangingData.RangeMilliMeter,
-//                       ( RangingData.SignalRateRtnMegaCps / 65536.0 ), RangingData.AmbientRateRtnMegaCps / 65336.0 );
-
 //	  VL53L1_GetMeasurementDataReady  ( Dev1,  &DataReady ) ;
 //	            if(DataReady == 1){
 //	              VL53L1_GetRangingMeasurementData( Dev1, &RangingData );
@@ -313,10 +308,10 @@ int main(void)
 //	                sprintf((char*)BT_send_msg_buff, "ToF1 not ready\n\r");
 //	            }
 
-//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
-//	  HAL_Delay(10);
-//	  VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
-//	  HAL_Delay (100);
+	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+	  HAL_Delay(10);
+	  VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
+	  HAL_Delay (100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -1084,6 +1079,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : I2C_INT_Pin */
+  GPIO_InitStruct.Pin = I2C_INT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(I2C_INT_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : ToF_XSDN_36_Pin ToF_XSDN_25_Pin ToF_XSDN_14_Pin AD_CS4_Pin
                            AD_CS3_Pin AD_CS2_Pin */
   GPIO_InitStruct.Pin = ToF_XSDN_36_Pin|ToF_XSDN_25_Pin|ToF_XSDN_14_Pin|AD_CS4_Pin
@@ -1121,6 +1122,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(LED_OE_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
@@ -1134,7 +1138,10 @@ static void MX_GPIO_Init(void)
 //}
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	buttonMessageFlag = true;
+	VL53L1_GetRangingMeasurementData( Dev1, &RangingData );
+	sprintf( (char*)BT_send_msg_buff, "ToF1: %d, %d, %.2f, %.2f\n\r", RangingData.RangeStatus, RangingData.RangeMilliMeter,
+			   ( RangingData.SignalRateRtnMegaCps / 65536.0 ), RangingData.AmbientRateRtnMegaCps / 65336.0 );
+	VL53L1_ClearInterruptAndStartMeasurement(Dev1);
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
