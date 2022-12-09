@@ -3,4 +3,6 @@
 
 void ServoPosition(TIM_HandleTypeDef* const pwmHandle, double    angle);
 
+float SteeringAngle(float p, float delta);
+
 #endif
