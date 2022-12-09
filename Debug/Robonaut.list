@@ -4758,10 +4758,10 @@ float SteeringAngle(float p, float delta){
  80025cc:	af00      	add	r7, sp, #0
  80025ce:	ed87 0a01 	vstr	s0, [r7, #4]
  80025d2:	edc7 0a00 	vstr	s1, [r7]
-	float kp=-1.159;
+	float kp=-31.94;
  80025d6:	4b30      	ldr	r3, [pc, #192]	; (8002698 <SteeringAngle+0xd0>)
  80025d8:	617b      	str	r3, [r7, #20]
-	float kd=-0.7812;
+	float kd=-7.7944;
  80025da:	4b30      	ldr	r3, [pc, #192]	; (800269c <SteeringAngle+0xd4>)
  80025dc:	613b      	str	r3, [r7, #16]
 	float phi = atan(0.7826*tan(-kp*p-kd*delta));
@@ -4828,8 +4828,8 @@ float SteeringAngle(float p, float delta){
  800268c:	3fe90b0f 	.word	0x3fe90b0f
  8002690:	d70a3d71 	.word	0xd70a3d71
  8002694:	4070d0a3 	.word	0x4070d0a3
- 8002698:	bf945a1d 	.word	0xbf945a1d
- 800269c:	bf47fcb9 	.word	0xbf47fcb9
+ 8002698:	c1ff851f 	.word	0xc1ff851f
+ 800269c:	c0f96bba 	.word	0xc0f96bba
  80026a0:	40568000 	.word	0x40568000
 
 080026a4 <HAL_MspInit>:
