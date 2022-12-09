@@ -11,4 +11,4 @@
 ../Core/Src/linesensor.c:301:6:LS_feedback_all	40	static
 ../Core/Src/linesensor.c:317:6:LS_feedback_led	40	static
 ../Core/Src/linesensor.c:334:7:LS_delta_angle	24	static
-../Core/Src/linesensor.c:341:7:LS_p	48	static
+../Core/Src/linesensor.c:341:7:LS_p	24	static

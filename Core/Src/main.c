@@ -176,15 +176,15 @@ int main(void)
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 
-  // Initialize ToF
-  VL53L1_RangingMeasurementData_t RangingData;
-  VL53L1_Dev_t  vl53l1_1; // ToF1
-  VL53L1_DEV    Dev1 = &vl53l1_1;
-  uint8_t DataReady;
-
-  // initialize vl53l1x communication parameters
-  Dev1->I2cHandle = &hi2c2;
-  Dev1->I2cDevAddr = 0x52;
+//  // Initialize ToF
+//  VL53L1_RangingMeasurementData_t RangingData;
+//  VL53L1_Dev_t  vl53l1_1; // ToF1
+//  VL53L1_DEV    Dev1 = &vl53l1_1;
+//  uint8_t DataReady;
+//
+//  // initialize vl53l1x communication parameters
+//  Dev1->I2cHandle = &hi2c2;
+//  Dev1->I2cDevAddr = 0x52;
 
 //  // all ToF reset
 //  HAL_GPIO_WritePin(XSHUT2_GPIO_Port, XSHUT2_Pin, GPIO_PIN_RESET);
@@ -223,14 +223,14 @@ int main(void)
 
 
   //unsigned char ADC_value_string[10];
-  //uint8_t leds_on[4];// = {1, 1, 1, 1};
-  //uint8_t fb_leds_on[4] = {0};
+  uint8_t leds_on[4];// = {1, 1, 1, 1};
+  uint8_t fb_leds_on[4] = {0};
   //uint8_t fb_leds_to_light[5] = {50, 50, 50, 50, 50};
   uint16_t ADC_values_front[32] = {0};
   uint16_t ADC_values_rear[32] = {0};
-//  float line_pos[2];
+  float line_pos[2];
 //  bool feedback_rear = false;
-//  float delta, p;
+  float delta, p, str_angle;
 //  enum circuit_section circuit_Section;
 //  circuit_Section = Fast_section;
   //LS_INF_Send(&hspi3, leds_off);
@@ -248,26 +248,21 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if(duty_MA>9.5)
-		  sprintf((char*)BT_send_msg_buff, "OK\n\r");
-	  else
-		  sprintf((char*)BT_send_msg_buff, "Not OK\n\r");
-	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
-	  HAL_Delay(10);
-
-//	  ServoPosition(&htim5, 90);
-
-//	  //LineSensor_FrontOnly(&hspi3, &hspi1);
-//	  LineSensor_FrontAndBack(&huart2, &hspi3, &hspi1, &hspi2, ADC_values_front, ADC_values_rear);
-//	  line_pos[0] = LS_Holavonal_favago(ADC_values_front, &summ, &MA_sum_front);
-//	  line_pos[1] = LS_Holavonal_favago(ADC_values_rear, &summ2, &MA_sum_rear);
-//	  LS_feedback_all(&hspi3, ADC_values_front);
+	  LineSensor_FrontAndBack(&huart2, &hspi3, &hspi1, &hspi2, ADC_values_front, ADC_values_rear);
+	  line_pos[0] = LS_Holavonal_favago(ADC_values_front, &summ, &MA_sum_front);
+	  line_pos[1] = LS_Holavonal_favago(ADC_values_rear, &summ2, &MA_sum_rear);
+	  LS_feedback_all(&hspi3, ADC_values_front);
 //	  //LS_feedback_led(&hspi3, line_pos, feedback_rear);
-//
-//	  delta = LS_delta_angle(line_pos[0], line_pos[1]);
-//
-//	  p = LS_p(line_pos[0],line_pos[1],delta);
 
+	  delta = LS_delta_angle(line_pos[0], line_pos[1]);
+	  p = LS_p(line_pos[0]);
+	  str_angle = SteeringAngle(p, delta);
+
+	  sprintf((char*)BT_send_msg_buff, "p: %f, delta: %f, steering angle: %f\n\r", p, delta*57.3, str_angle*57.3);
+
+	  if(duty_MA>9.5)
+	  		  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+	  HAL_Delay(10);
 
 //	  if (circuit_Section == Fast_section)
 //	  {

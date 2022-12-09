@@ -1,1 +1,2 @@
 ../Core/Src/servo.c:4:6:ServoPosition	24	static
+../Core/Src/servo.c:12:7:SteeringAngle	32	static

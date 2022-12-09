@@ -1,5 +1,5 @@
 #include "main.h"
-
+#include <math.h>
 
 void ServoPosition(TIM_HandleTypeDef* const pwmHandle, double    angle){
     if(angle < 36){angle = 36;}
@@ -10,8 +10,8 @@ void ServoPosition(TIM_HandleTypeDef* const pwmHandle, double    angle){
 
 
 float SteeringAngle(float p, float delta){
-	kp=-1.159;
-	kd=-0.7812;
+	float kp=-1.159;
+	float kd=-0.7812;
 	float phi = atan(0.7826*tan(-kp*p-kd*delta));
 	return phi;
 }
