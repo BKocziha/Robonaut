@@ -53,7 +53,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_data.h \
  D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_def.h \
  D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_preset_setup.h \
- ../Core/Inc/bluetooth.h ../Core/Inc/linesensor.h ../Core/Inc/servo.h
+ ../Core/Inc/bluetooth.h ../Core/Inc/linesensor.h ../Core/Inc/servo.h \
+ ../Core/Inc/motor.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -112,3 +113,4 @@ D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_preset_setup.
 ../Core/Inc/bluetooth.h:
 ../Core/Inc/linesensor.h:
 ../Core/Inc/servo.h:
+../Core/Inc/motor.h:
