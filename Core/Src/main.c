@@ -260,8 +260,10 @@ int main(void)
 
 	  sprintf((char*)BT_send_msg_buff, "p: %f, delta: %f, steering angle: %f\n\r", p, delta*57.3, str_angle*57.3);
 
-	  if(duty_MA>9.5)
-	  		  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+	  if(duty_MA>9.5){
+		  ServoPosition(&htim13, str_angle);
+		  }
+	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 	  HAL_Delay(10);
 
 //	  if (circuit_Section == Fast_section)

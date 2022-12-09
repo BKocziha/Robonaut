@@ -13,5 +13,6 @@ float SteeringAngle(float p, float delta){
 	float kp=-1.159;
 	float kd=-0.7812;
 	float phi = atan(0.7826*tan(-kp*p-kd*delta));
-	return phi;
+	float servoangle=90+phi*269.04;
+	return servoangle;
 }
