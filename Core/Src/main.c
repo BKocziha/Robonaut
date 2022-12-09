@@ -97,6 +97,7 @@ enum circuit_section {Slow_section, Fast_section};
 // Flags
 bool BTMessageFlag = false;
 bool buttonMessageFlag = false;
+bool DriveEnableFlag = false;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -130,7 +131,7 @@ uint32_t cnt_high = 0;
 float duty = 0;
 float duty_MA = 0;
 float duty_alpha = 0.2;
-int duty_motor=15; // Lassú menés: 10 Gyors menés: 40
+int duty_motor=40; // Lassú menés: 10 Gyors menés: 40
 /* USER CODE END 0 */
 
 /**
@@ -270,9 +271,11 @@ int main(void)
 		  }
 	  else
 		  HAL_GPIO_WritePin(DRV_EN_GPIO_Port, DRV_EN_Pin, GPIO_PIN_RESET);
-	  //sprintf((char*)BT_send_msg_buff, "steering angle: %f \n\r", str_angle);
+
+	  if (MA_sum_front > 6000)
+		  duty_motor = 15;
+	  //sprintf((char*)BT_send_msg_buff, "MA sum front: %d \n\r", MA_sum_front);
 	  //BT_TransmitMsg(&huart2, BT_send_msg_buff);
-	  HAL_Delay(1);
 
 //	  if (circuit_Section == Fast_section)
 //	  {

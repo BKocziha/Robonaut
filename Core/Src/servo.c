@@ -10,8 +10,8 @@ void ServoPosition(TIM_HandleTypeDef* const pwmHandle, double    angle){
 
 
 float SteeringAngle(float p, float delta){
-	float kp=-10.0;
-	float kd=-0.5;
+	float kp=-0.75;
+	float kd=1.0;
 	float phi = atan(0.7826*tan(-kp*p-kd*delta));
 	float servoangle=90-phi*269.04;
 	return servoangle;
