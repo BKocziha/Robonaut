@@ -126,8 +126,9 @@ static void MX_TIM7_Init(void);
 // Will be calculated in interrupt callback
 uint32_t cnt_full = 0;
 uint32_t cnt_high = 0;
-float freq = 0;
 float duty = 0;
+float duty_MA = 0;
+float duty_alpha = 0.1;
 /* USER CODE END 0 */
 
 /**
@@ -234,14 +235,12 @@ int main(void)
 //  circuit_Section = Fast_section;
   //LS_INF_Send(&hspi3, leds_off);
 
-  bool dead_man_switch = false;
-
-  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1); // Primary channel - rising edge - rinse and repeat
-  HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_2);    // Secondary channel - falling edge - stop second counter
+  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1); // Dead man switch PWM input
+  HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_2);    // Dead man switch PWM input
 
   // kb. 3 másodpercenkétn előidéz egy interruptot
 //  HAL_TIM_Base_Start_IT(&htim7);
-//
+
 //  HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
@@ -249,8 +248,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
-
+	  if(duty_MA>9.5)
+		  sprintf((char*)BT_send_msg_buff, "OK\n\r");
+	  else
+		  sprintf((char*)BT_send_msg_buff, "Not OK\n\r");
+	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+	  HAL_Delay(10);
 
 //	  ServoPosition(&htim5, 90);
 
@@ -654,7 +657,7 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 0;
+  htim2.Init.Prescaler = 9-1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = 4294967295;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1119,8 +1122,8 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 		cnt_full = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) + 2;
 		cnt_high = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) + 2;
 
-		freq = (float) 90000000 / (cnt_full);
 		duty = (float) 100 * cnt_high / cnt_full;
+		duty_MA = duty_alpha * duty + (1-duty_alpha) * duty_MA;
 	}
 }
 

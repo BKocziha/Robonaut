@@ -29,7 +29,7 @@ void LS_feedback_led(SPI_HandleTypeDef *hspi_led, float *line_pos, bool feedback
 
 float LS_delta_angle(float p1, float p2);
 
-float LS_p(float f1, float f2, float delta);
+float LS_p(float f1);
 
 void LS_feedback_all(SPI_HandleTypeDef *hspi_led, uint16_t *ADC_values);
 
