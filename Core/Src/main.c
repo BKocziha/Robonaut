@@ -75,6 +75,7 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim7;
+TIM_HandleTypeDef htim10;
 TIM_HandleTypeDef htim13;
 
 UART_HandleTypeDef huart2;
@@ -130,6 +131,7 @@ static void MX_I2C2_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_TIM7_Init(void);
+static void MX_TIM10_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -189,6 +191,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART6_UART_Init();
   MX_TIM7_Init();
+  MX_TIM10_Init();
   /* USER CODE BEGIN 2 */
 
   // initialize vl53l1x communication parameters
@@ -221,13 +224,13 @@ int main(void)
 
 //  /*** VL53L1X Initialization ***/
 //  // Dev1
-//  VL53L1_WaitDeviceBooted( Dev1 );
-//  VL53L1_DataInit( Dev1 );
-//  VL53L1_StaticInit( Dev1 );
-//  VL53L1_SetDistanceMode( Dev1, VL53L1_DISTANCEMODE_LONG );
-//  VL53L1_SetMeasurementTimingBudgetMicroSeconds( Dev1, 50000 );
-//  VL53L1_SetInterMeasurementPeriodMilliSeconds( Dev1, 100 );
-//  VL53L1_StartMeasurement( Dev1 );
+  VL53L1_WaitDeviceBooted( Dev1 );
+  VL53L1_DataInit( Dev1 );
+  VL53L1_StaticInit( Dev1 );
+  VL53L1_SetDistanceMode( Dev1, VL53L1_DISTANCEMODE_LONG );
+  VL53L1_SetMeasurementTimingBudgetMicroSeconds( Dev1, 20000 );
+  VL53L1_SetInterMeasurementPeriodMilliSeconds( Dev1, 25 );
+  VL53L1_StartMeasurement( Dev1 );
 
 
 
@@ -248,6 +251,7 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1); // Dead man switch PWM input
   HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_2);    // Dead man switch PWM input
 
+  HAL_TIM_Base_Start_IT(&htim10);
   HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
@@ -344,8 +348,9 @@ int main(void)
 			}
 	  		break;
 	  }
-//	  sprintf((char*)BT_send_msg_buff, "%State: %d   MA: %d    Duty: %d\n\r", circuit_Section, MA_sum_front, duty_motor);
-//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+	  sprintf( (char*)BT_send_msg_buff, "ToF1: %d, %d, %.2f, %.2f\n\r", RangingData.RangeStatus, RangingData.RangeMilliMeter,
+			  	  	  ( RangingData.SignalRateRtnMegaCps / 65536.0 ), RangingData.AmbientRateRtnMegaCps / 65336.0 );
+	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
 
 //	  if (buttonMessageFlag){
@@ -985,6 +990,37 @@ static void MX_TIM7_Init(void)
 }
 
 /**
+  * @brief TIM10 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM10_Init(void)
+{
+
+  /* USER CODE BEGIN TIM10_Init 0 */
+
+  /* USER CODE END TIM10_Init 0 */
+
+  /* USER CODE BEGIN TIM10_Init 1 */
+
+  /* USER CODE END TIM10_Init 1 */
+  htim10.Instance = TIM10;
+  htim10.Init.Prescaler = 45000-1;
+  htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim10.Init.Period = 400-1;
+  htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim10.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM10_Init 2 */
+
+  /* USER CODE END TIM10_Init 2 */
+
+}
+
+/**
   * @brief TIM13 Initialization Function
   * @param None
   * @retval None
@@ -1211,6 +1247,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 //		}
 //		}
 	}
+	if (htim == &htim10 )
+	  {
+		VL53L1_GetMeasurementDataReady  ( Dev1,  &DataReady ) ;
+		if(DataReady == 1){
+			VL53L1_GetRangingMeasurementData( Dev1, &RangingData );
+		}
+
+		VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
+	  }
 }
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {

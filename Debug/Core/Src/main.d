@@ -33,26 +33,26 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_api.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_api_strings.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_def.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_ll_def.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_ll_device.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_types.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_config.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_error_codes.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_register_structs.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_register_map.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_defines.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_error_exceptions.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_api_core.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_ll_def.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_log.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_ipp_imports.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_data.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_def.h \
- D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_preset_setup.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_api.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_api_strings.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_def.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_ll_def.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_ll_device.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_types.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_config.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_error_codes.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_register_structs.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_register_map.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_defines.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_error_exceptions.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_api_core.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_ll_def.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_log.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_ipp_imports.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_data.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_def.h \
+ C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_preset_setup.h \
  ../Core/Inc/bluetooth.h ../Core/Inc/linesensor.h ../Core/Inc/servo.h \
  ../Core/Inc/motor.h
 ../Core/Inc/main.h:
@@ -90,26 +90,26 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_api.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_api_strings.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_def.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_ll_def.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_ll_device.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_types.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_config.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_error_codes.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_register_structs.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_register_map.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_defines.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_error_exceptions.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_api_core.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_ll_def.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_log.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_ipp_imports.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_data.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_def.h:
-D:/BME_MSc/STM32Workspace/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_preset_setup.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_api.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_api_strings.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_def.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_ll_def.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_ll_device.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_types.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_config.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_error_codes.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_register_structs.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_register_map.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_defines.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_error_exceptions.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_api_core.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_ll_def.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_log.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_ipp_imports.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/platform/inc/vl53l1_platform_user_data.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_def.h:
+C:/Users/Andris/Rendszerarchi_STM32/Robonaut-Barni/Robonaut/Drivers/VL53L1X/core/inc/vl53l1_preset_setup.h:
 ../Core/Inc/bluetooth.h:
 ../Core/Inc/linesensor.h:
 ../Core/Inc/servo.h:
