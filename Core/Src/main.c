@@ -103,6 +103,7 @@ uint8_t DataReady;
 bool BTMessageFlag = false;
 bool buttonMessageFlag = false;
 bool DriveEnableFlag = false;
+bool decel_end_flag = false;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -133,10 +134,10 @@ static void MX_TIM7_Init(void);
 // Will be calculated in interrupt callback
 uint32_t cnt_full = 0;
 uint32_t cnt_high = 0;
-float duty = 0;
+float duty_deadman = 0;
 float duty_MA = 0;
-float duty_alpha = 0.2;
-int duty_motor=40; // Lassú menés: 10 Gyors menés: 40
+float duty_alpha = 0.5;
+int duty_motor; // Lassú menés: 10 Gyors menés: 40
 /* USER CODE END 0 */
 
 /**
@@ -212,15 +213,15 @@ int main(void)
 //  HAL_Delay(10);
 //  Dev2->I2cDevAddr = 0x50; // set Dev2 0x50
 
-  /*** VL53L1X Initialization ***/
-  // Dev1
-  VL53L1_WaitDeviceBooted( Dev1 );
-  VL53L1_DataInit( Dev1 );
-  VL53L1_StaticInit( Dev1 );
-  VL53L1_SetDistanceMode( Dev1, VL53L1_DISTANCEMODE_LONG );
-  VL53L1_SetMeasurementTimingBudgetMicroSeconds( Dev1, 50000 );
-  VL53L1_SetInterMeasurementPeriodMilliSeconds( Dev1, 100 );
-  VL53L1_StartMeasurement( Dev1 );
+//  /*** VL53L1X Initialization ***/
+//  // Dev1
+//  VL53L1_WaitDeviceBooted( Dev1 );
+//  VL53L1_DataInit( Dev1 );
+//  VL53L1_StaticInit( Dev1 );
+//  VL53L1_SetDistanceMode( Dev1, VL53L1_DISTANCEMODE_LONG );
+//  VL53L1_SetMeasurementTimingBudgetMicroSeconds( Dev1, 50000 );
+//  VL53L1_SetInterMeasurementPeriodMilliSeconds( Dev1, 100 );
+//  VL53L1_StartMeasurement( Dev1 );
 
 
 
@@ -234,15 +235,12 @@ int main(void)
 //  bool feedback_rear = false;
   float delta, p, str_angle;
   int pwm_val;
-//  enum circuit_section circuit_Section;
+  enum circuit_section circuit_Section = Fast_section;
 //  circuit_Section = Fast_section;
   //LS_INF_Send(&hspi3, leds_off);
 
   HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1); // Dead man switch PWM input
   HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_2);    // Dead man switch PWM input
-
-  // kb. 3 másodpercenkétn előidéz egy interruptot
-//  HAL_TIM_Base_Start_IT(&htim7);
 
   HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
@@ -253,8 +251,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
-
 	  LineSensor_FrontAndBack(&huart2, &hspi3, &hspi1, &hspi2, ADC_values_front, ADC_values_rear);
 	  line_pos[0] = LS_Holavonal_favago(ADC_values_front, line_pos[0], &summ, &MA_sum_front);
 	  line_pos[1] = LS_Holavonal_favago(ADC_values_rear, line_pos[1], &summ2, &MA_sum_rear);
@@ -263,32 +259,43 @@ int main(void)
 
 	  delta = LS_delta_angle(line_pos[0], line_pos[1]);
 	  p = LS_p(line_pos[0]);
-	  str_angle = SteeringAngle(p, delta);
-
-	  //pwm_val = MotorDrive(&htim4, duty_motor);
-	  //ServoPosition(&htim5, str_angle);
-	  if(duty_MA>9.5){
+	  pwm_val = MotorDrive(&htim4, duty_motor);
+	  ServoPosition(&htim5, str_angle);
+	  if(duty_MA>10){
 		  HAL_GPIO_WritePin(DRV_EN_GPIO_Port, DRV_EN_Pin, GPIO_PIN_SET);
 		  }
 	  else
 		  HAL_GPIO_WritePin(DRV_EN_GPIO_Port, DRV_EN_Pin, GPIO_PIN_RESET);
 
-	  if (MA_sum_front > 6000)
-		  duty_motor = 15;
-	  //sprintf((char*)BT_send_msg_buff, "MA sum front: %d \n\r", MA_sum_front);
-	  //BT_TransmitMsg(&huart2, BT_send_msg_buff);
+//	  sprintf((char*)BT_send_msg_buff, "Duty_deadman: %f \n\r", duty_deadman);
+//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
-//	  if (circuit_Section == Fast_section)
-//	  {
-//		  if (MA_sum_front > 15000){
-//			  circuit_Section = Slow_section;
-//		  }
-//		  sprintf((char*)BT_send_msg_buff, "FAST SECTION,  sum: %d, MA_sum_front: %d\n\r", summ, MA_sum_front);
-//	  }
-//	  if (circuit_Section == Slow_section)
-//	  {
-//		  sprintf((char*)BT_send_msg_buff, "SLOW SECTION,  sum: %d, MA_sum_front: %d\n\r", summ, MA_sum_front);
-//	  }
+	  //	float kp=-0.75;
+	  //	float kd=1.0;
+	  //	float kp=-10;
+	  //	float kd=0.0;
+
+	  if (circuit_Section == Fast_section)
+	  {
+		  duty_motor = 40;
+		  str_angle = SteeringAngle(p, delta, -0.75, 1.0);
+		  if (MA_sum_front > 10000){
+			  // kb. 2 másodpercenkétn előidéz egy interruptot
+			  HAL_TIM_Base_Start_IT(&htim7);
+			  duty_motor = 15;
+		  }
+		  if (decel_end_flag){
+			  circuit_Section = Slow_section;
+		  }
+	  }
+	  if (circuit_Section == Slow_section)
+	  {
+		  duty_motor = 15;
+		  str_angle = SteeringAngle(p, delta, -10.0, 0.0);
+	  }
+
+	  sprintf((char*)BT_send_msg_buff, " %d\n\r", circuit_Section);
+	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
 //	  if (buttonMessageFlag){
 //		  if (feedback_rear)
@@ -308,10 +315,10 @@ int main(void)
 //	                sprintf((char*)BT_send_msg_buff, "ToF1 not ready\n\r");
 //	            }
 
-	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
-	  HAL_Delay(10);
-	  VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
-	  HAL_Delay (100);
+//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+//	  HAL_Delay(10);
+//	  VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
+//	  HAL_Delay (100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -908,7 +915,7 @@ static void MX_TIM7_Init(void)
   htim7.Instance = TIM7;
   htim7.Init.Prescaler = 10000-1;
   htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim7.Init.Period = 30000-1;
+  htim7.Init.Period = 20000-1;
   htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
   {
@@ -1121,13 +1128,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_OE_GPIO_Port, &GPIO_InitStruct);
 
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
-
 }
 
 /* USER CODE BEGIN 4 */
@@ -1138,25 +1138,29 @@ static void MX_GPIO_Init(void)
 //}
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	VL53L1_GetRangingMeasurementData( Dev1, &RangingData );
-	sprintf( (char*)BT_send_msg_buff, "ToF1: %d, %d, %.2f, %.2f\n\r", RangingData.RangeStatus, RangingData.RangeMilliMeter,
-			   ( RangingData.SignalRateRtnMegaCps / 65536.0 ), RangingData.AmbientRateRtnMegaCps / 65336.0 );
-	VL53L1_ClearInterruptAndStartMeasurement(Dev1);
+//	VL53L1_GetRangingMeasurementData( Dev1, &RangingData );
+//	sprintf( (char*)BT_send_msg_buff, "ToF1: %d, %d, %.2f, %.2f\n\r", RangingData.RangeStatus, RangingData.RangeMilliMeter,
+//			   ( RangingData.SignalRateRtnMegaCps / 65536.0 ), RangingData.AmbientRateRtnMegaCps / 65336.0 );
+//	VL53L1_ClearInterruptAndStartMeasurement(Dev1);
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-//	if (htim == &htim7)
-//	{
-//		if (lightIsOn){
-//			LS_LED_Send(&hspi3, leds_off);
-//			lightIsOn = false;
-//		}
-//		else{
-//			LS_LED_Send(&hspi3, leds_all_on);
-//			lightIsOn = true;
-//		}
-//	}
+	if (htim == &htim7)
+	{
+		//decel_end_flag = true;
+			if (htim == &htim7)
+			{
+				if (lightIsOn){
+					LS_LED_Send(&hspi3, leds_off);
+					lightIsOn = false;
+				}
+				else{
+					LS_LED_Send(&hspi3, leds_all_on);
+					lightIsOn = true;
+				}
+			}
+	}
 }
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
@@ -1164,8 +1168,8 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 		cnt_full = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) + 2;
 		cnt_high = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) + 2;
 
-		duty = (float) 100 * cnt_high / cnt_full;
-		duty_MA = duty_alpha * duty + (1-duty_alpha) * duty_MA;
+		duty_deadman = (float) 100 * cnt_high / cnt_full;
+		duty_MA = duty_alpha * duty_deadman + (1-duty_alpha) * duty_MA;
 	}
 }
 
