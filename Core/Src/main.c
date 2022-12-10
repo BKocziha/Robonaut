@@ -48,7 +48,7 @@
 #define ADC_7 48
 #define ADC_8 56
 
-#define KP_SLOW -5 //-10
+#define KP_SLOW -4 //-10 //-5
 #define KD_SLOW 0.5
 #define KP_FAST -0.6
 #define KD_FAST 0.7
@@ -283,7 +283,7 @@ int main(void)
 
 	  switch(circuit_Section) {
 	  	  case Fast_section:
-			duty_motor = 60;
+			duty_motor = 80;
 			str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
 			if (decel_end_flag == 0 && 10000 < MA_sum_front){
 			  // kb. 2 másodpercenkétn előidéz egy interruptot
@@ -335,7 +335,7 @@ int main(void)
 //			}
 //			break;
 	  	  case Acceleration:
-	  		duty_motor = 60;
+	  		duty_motor = 80;
 	  		str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
 	  		if (decel_end_flag == 2){
 				HAL_TIM_Base_Stop_IT(&htim7);

@@ -2496,9 +2496,9 @@ int main(void)
  8001874:	0800192f 	.word	0x0800192f
  8001878:	0800196f 	.word	0x0800196f
 	  	  case Fast_section:
-			duty_motor = 60;
+			duty_motor = 80;
  800187c:	4b5e      	ldr	r3, [pc, #376]	; (80019f8 <main+0x33c>)
- 800187e:	223c      	movs	r2, #60	; 0x3c
+ 800187e:	2250      	movs	r2, #80	; 0x50
  8001880:	601a      	str	r2, [r3, #0]
 			str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
  8001882:	eddf 1a60 	vldr	s3, [pc, #384]	; 8001a04 <main+0x348>
@@ -2572,7 +2572,7 @@ int main(void)
  8001902:	601a      	str	r2, [r3, #0]
 	  		str_angle = SteeringAngle(p, delta, KP_SLOW, KD_SLOW);
  8001904:	eef6 1a00 	vmov.f32	s3, #96	; 0x3f000000  0.5
- 8001908:	eeb9 1a04 	vmov.f32	s2, #148	; 0xc0a00000 -5.0
+ 8001908:	eeb9 1a00 	vmov.f32	s2, #144	; 0xc0800000 -4.0
  800190c:	edd7 0a25 	vldr	s1, [r7, #148]	; 0x94
  8001910:	ed97 0a24 	vldr	s0, [r7, #144]	; 0x90
  8001914:	f000 ff20 	bl	8002758 <SteeringAngle>
@@ -2595,7 +2595,7 @@ int main(void)
  8001932:	601a      	str	r2, [r3, #0]
 			str_angle = SteeringAngle(p, delta, KP_SLOW, KD_SLOW);
  8001934:	eef6 1a00 	vmov.f32	s3, #96	; 0x3f000000  0.5
- 8001938:	eeb9 1a04 	vmov.f32	s2, #148	; 0xc0a00000 -5.0
+ 8001938:	eeb9 1a00 	vmov.f32	s2, #144	; 0xc0800000 -4.0
  800193c:	edd7 0a25 	vldr	s1, [r7, #148]	; 0x94
  8001940:	ed97 0a24 	vldr	s0, [r7, #144]	; 0x90
  8001944:	f000 ff08 	bl	8002758 <SteeringAngle>
@@ -2624,9 +2624,9 @@ int main(void)
 //			}
 //			break;
 	  	  case Acceleration:
-	  		duty_motor = 60;
+	  		duty_motor = 80;
  800196e:	4b22      	ldr	r3, [pc, #136]	; (80019f8 <main+0x33c>)
- 8001970:	223c      	movs	r2, #60	; 0x3c
+ 8001970:	2250      	movs	r2, #80	; 0x50
  8001972:	601a      	str	r2, [r3, #0]
 	  		str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
  8001974:	eddf 1a23 	vldr	s3, [pc, #140]	; 8001a04 <main+0x348>
