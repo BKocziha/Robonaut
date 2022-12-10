@@ -47,6 +47,11 @@
 #define ADC_6 40
 #define ADC_7 48
 #define ADC_8 56
+
+#define KP_SLOW -4 //-10
+#define KD_SLOW 0.5
+#define KP_FAST -0.75
+#define KD_FAST 1.0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -91,7 +96,7 @@ bool lightIsOn = false;
 int MA_sum_front = 0;
 int MA_sum_rear = 0;
 int summ, summ2;
-enum circuit_section {Slow_section, Fast_section};
+enum circuit_section {Slow_section, Fast_section, Braking, Slow_waiting, Acceleration};
 
 // Initialize ToF
 VL53L1_RangingMeasurementData_t RangingData;
@@ -103,7 +108,7 @@ uint8_t DataReady;
 bool BTMessageFlag = false;
 bool buttonMessageFlag = false;
 bool DriveEnableFlag = false;
-bool decel_end_flag = false;
+int decel_end_flag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -275,27 +280,53 @@ int main(void)
 	  //	float kp=-10;
 	  //	float kd=0.0;
 
-	  if (circuit_Section == Fast_section)
-	  {
-		  duty_motor = 40;
-		  str_angle = SteeringAngle(p, delta, -0.75, 1.0);
-		  if (MA_sum_front > 10000){
+	  switch(circuit_Section) {
+	  	  case Fast_section:
+			duty_motor = 40;
+			str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
+			if (decel_end_flag == 0 && 9000 < MA_sum_front){
 			  // kb. 2 másodpercenkétn előidéz egy interruptot
 			  HAL_TIM_Base_Start_IT(&htim7);
-			  duty_motor = 15;
-		  }
-		  if (decel_end_flag){
-			  circuit_Section = Slow_section;
-		  }
+			  circuit_Section = Braking;
+			}
+			break;
+	  	  case Braking:
+	  		duty_motor = 13;
+	  		str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
+	  		if (decel_end_flag == 2){
+				HAL_TIM_Base_Stop_IT(&htim7);
+				decel_end_flag =0;
+				circuit_Section = Slow_section;
+			}
+	  		break;
+	  	  case Slow_section:
+	  		duty_motor = 20;
+	  		str_angle = SteeringAngle(p, delta, KP_SLOW, KD_SLOW);
+	  		if (MA_sum_front < 8000){
+	  			 circuit_Section = Slow_waiting;
+	  		}
+	  		break;
+	  	  case Slow_waiting:
+	  		duty_motor = 20;
+			str_angle = SteeringAngle(p, delta, KP_SLOW, KD_SLOW);
+	  		if (decel_end_flag == 0 && 10000 < MA_sum_front){
+	  			HAL_TIM_Base_Start_IT(&htim7);
+	  			circuit_Section = Acceleration;
+	  		}
+	  		break;
+	  	  case Acceleration:
+	  		duty_motor = 40;
+	  		str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
+	  		if (decel_end_flag == 2){
+				HAL_TIM_Base_Stop_IT(&htim7);
+				decel_end_flag =0;
+				circuit_Section = Fast_section;
+			}
+	  		break;
 	  }
-	  if (circuit_Section == Slow_section)
-	  {
-		  duty_motor = 15;
-		  str_angle = SteeringAngle(p, delta, -10.0, 0.0);
-	  }
+//	  sprintf((char*)BT_send_msg_buff, "%State: %d   MA: %d    Duty: %d\n\r", circuit_Section, MA_sum_front, duty_motor);
+//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
-	  sprintf((char*)BT_send_msg_buff, " %d\n\r", circuit_Section);
-	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
 //	  if (buttonMessageFlag){
 //		  if (feedback_rear)
@@ -915,7 +946,7 @@ static void MX_TIM7_Init(void)
   htim7.Instance = TIM7;
   htim7.Init.Prescaler = 10000-1;
   htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim7.Init.Period = 20000-1;
+  htim7.Init.Period = 12000-1;
   htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
   {
@@ -1148,18 +1179,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim == &htim7)
 	{
-		//decel_end_flag = true;
-			if (htim == &htim7)
-			{
-				if (lightIsOn){
-					LS_LED_Send(&hspi3, leds_off);
-					lightIsOn = false;
-				}
-				else{
-					LS_LED_Send(&hspi3, leds_all_on);
-					lightIsOn = true;
-				}
-			}
+		decel_end_flag++;
+//		if (decel_end_flag == 2){
+//		if (lightIsOn){
+//			LS_LED_Send(&hspi3, leds_off);
+//			lightIsOn = false;
+//		}
+//		else{
+//			LS_LED_Send(&hspi3, leds_all_on);
+//			lightIsOn = true;
+//		}
+//		}
 	}
 }
 
