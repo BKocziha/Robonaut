@@ -101,13 +101,14 @@ bool lightIsOn = false;
 int MA_sum_front = 0;
 int MA_sum_rear = 0;
 int summ, summ2;
-enum circuit_section {Slow_section, Fast_section, Braking, Slow_waiting, Acceleration, Chicane_breaking, Chicane};
+enum circuit_section {Slow_section, Fast_section, Braking, Slow_waiting, Acceleration};
 
 // Initialize ToF
 VL53L1_RangingMeasurementData_t RangingData;
 VL53L1_Dev_t  vl53l1_1; // ToF1
 VL53L1_DEV    Dev1 = &vl53l1_1;
 uint8_t DataReady;
+int prev_error = 0;
 
 // Flags
 bool BTMessageFlag = false;
@@ -148,7 +149,7 @@ uint32_t cnt_full = 0;
 uint32_t cnt_high = 0;
 float duty_deadman = 0;
 float duty_alpha = 1.0;
-int duty_motor; // Lassú menés: 10 Gyors menés: 40
+int duty_motor;
 /* USER CODE END 0 */
 
 /**
@@ -246,7 +247,6 @@ int main(void)
   float line_pos[2];
 //  bool feedback_rear = false;
   float delta, p, str_angle;
-  int pwm_val;
   enum circuit_section circuit_Section = Fast_section;
 //  circuit_Section = Fast_section;
   //LS_INF_Send(&hspi3, leds_off);
@@ -272,7 +272,7 @@ int main(void)
 
 	  delta = LS_delta_angle(line_pos[0], line_pos[1]);
 	  p = LS_p(line_pos[0]);
-	  pwm_val = MotorDrive(&htim4, duty_motor);
+	  MotorDrive(&htim4, duty_motor);
 	  ServoPosition(&htim5, str_angle);
 	  if(duty_deadman>10 && duty_deadman < 15){
 		  HAL_GPIO_WritePin(DRV_EN_GPIO_Port, DRV_EN_Pin, GPIO_PIN_SET);
@@ -283,7 +283,7 @@ int main(void)
 
 	  switch(circuit_Section) {
 	  	  case Fast_section:
-			duty_motor = DUTY_FAST;
+			//duty_motor = DUTY_FAST;
 			str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
 			if (decel_end_flag == 0 && 10000 < MA_sum_front){
 			  // kb. 2 másodpercenkétn előidéz egy interruptot
@@ -293,7 +293,7 @@ int main(void)
 			break;
 	  	  case Braking:
 	  		chicane_coming=true;
-	  		duty_motor = DUTY_BRAKE;
+	  		//duty_motor = DUTY_BRAKE;
 	  		str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
 	  		if (decel_end_flag == 3){
 				HAL_TIM_Base_Stop_IT(&htim7);
@@ -301,41 +301,23 @@ int main(void)
 				circuit_Section = Slow_section;
 			}
 	  		break;
-//	  	  case Chicane_breaking:
-//	  		chicane_coming=false;
-//	  		duty_motor = 20;
-//			str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
-//			if (decel_end_flag == 2){
-//				HAL_TIM_Base_Stop_IT(&htim7);
-//				decel_end_flag =0;
-//				circuit_Section = Slow_section;
-//			}
-//	  		break;
 	  	  case Slow_section:
-	  		duty_motor = DUTY_SLOW;
+	  		//duty_motor = DUTY_SLOW;
 	  		str_angle = SteeringAngle(p, delta, KP_SLOW, KD_SLOW);
 	  		if (MA_sum_front < 8000){
 	  			 circuit_Section = Slow_waiting;
 	  		}
 	  		break;
 	  	  case Slow_waiting:
-	  		duty_motor = DUTY_SLOW;
+	  		//duty_motor = DUTY_SLOW;
 			str_angle = SteeringAngle(p, delta, KP_SLOW, KD_SLOW);
 	  		if (decel_end_flag == 0 && 9000 < MA_sum_front){
 	  			HAL_TIM_Base_Start_IT(&htim7);
 	  			circuit_Section = Acceleration;
 	  		}
 	  		break;
-//	  	  case Chicane:
-//	  		chicane_coming=false;
-//			duty_motor = 25;
-//			str_angle = SteeringAngle(p, delta, KP_SLOW, KD_SLOW);
-//			if (MA_sum_front < 8000){
-//				 circuit_Section = Acceleration;
-//			}
-//			break;
 	  	  case Acceleration:
-	  		duty_motor = DUTY_FAST;
+	  		//duty_motor = DUTY_FAST;
 	  		str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
 	  		if (decel_end_flag == 2){
 				HAL_TIM_Base_Stop_IT(&htim7);
@@ -344,10 +326,12 @@ int main(void)
 			}
 	  		break;
 	  }
-//
-//
-//	  sprintf( (char*)BT_send_msg_buff, "STR: %f\n\r", str_angle);
-//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+
+	  duty_motor = MotorFollowControl(&prev_error, RangingData.RangeMilliMeter);
+
+
+	  sprintf( (char*)BT_send_msg_buff, "DST: %d, Duty cycle: %d\n\r", RangingData.RangeMilliMeter, duty_motor);
+	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
 
 //	  if (buttonMessageFlag){
@@ -357,18 +341,6 @@ int main(void)
 //			  feedback_rear = true;
 //		  buttonMessageFlag = false;
 //	  }
-
-//	  VL53L1_GetMeasurementDataReady  ( Dev1,  &DataReady ) ;
-//	            if(DataReady == 1){
-//	              VL53L1_GetRangingMeasurementData( Dev1, &RangingData );
-//	              sprintf( (char*)BT_send_msg_buff, "ToF1: %d, %d, %.2f, %.2f\n\r", RangingData.RangeStatus, RangingData.RangeMilliMeter,
-//	                               ( RangingData.SignalRateRtnMegaCps / 65536.0 ), RangingData.AmbientRateRtnMegaCps / 65336.0 );
-//	            }
-//	            else{
-//	                sprintf((char*)BT_send_msg_buff, "ToF1 not ready\n\r");
-//	            }
-
-//	  VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
 
     /* USER CODE END WHILE */
 
@@ -1231,16 +1203,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim == &htim7)
 	{
 		decel_end_flag++;
-//		if (decel_end_flag == 2){
-//		if (lightIsOn){
-//			LS_LED_Send(&hspi3, leds_off);
-//			lightIsOn = false;
-//		}
-//		else{
-//			LS_LED_Send(&hspi3, leds_all_on);
-//			lightIsOn = true;
-//		}
-//		}
 	}
 	if (htim == &htim10 )
 	  {
@@ -1259,7 +1221,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 		cnt_high = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) + 2;
 
 		duty_deadman = (float) 100 * cnt_high / cnt_full;
-//		duty_MA = duty_alpha * duty_deadman + (1-duty_alpha) * duty_MA;
 	}
 }
 

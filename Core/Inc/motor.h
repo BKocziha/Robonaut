@@ -10,4 +10,6 @@
 
 int MotorDrive(TIM_HandleTypeDef* const pwmHandle, int pwm_val);
 
+int MotorFollowControl(int* prev_error, int current_distance);
+
 #endif /* INC_MOTOR_H_ */
