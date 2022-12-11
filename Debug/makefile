@@ -62,8 +62,8 @@ all: main-build
 main-build: Robonaut.elf secondary-outputs
 
 # Tool invocations
-Robonaut.elf Robonaut.map: $(OBJS) $(USER_OBJS) C:\Users\Andris\Rendszerarchi_STM32\Robonaut-Barni\Robonaut\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Robonaut.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Andris\Rendszerarchi_STM32\Robonaut-Barni\Robonaut\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Robonaut.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+Robonaut.elf Robonaut.map: $(OBJS) $(USER_OBJS) D:\BME_MSc\STM32Workspace\Robonaut\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Robonaut.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\BME_MSc\STM32Workspace\Robonaut\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Robonaut.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

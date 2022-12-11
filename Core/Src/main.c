@@ -48,10 +48,14 @@
 #define ADC_7 48
 #define ADC_8 56
 
-#define KP_SLOW -4 //-10 //-5
-#define KD_SLOW 0.5
-#define KP_FAST -0.6
-#define KD_FAST 0.7
+#define KP_SLOW -5.7032 //-10 //-5
+#define KD_SLOW 0.3235
+#define KP_FAST -0.7188
+#define KD_FAST 0.5894
+
+#define DUTY_FAST 60
+#define DUTY_SLOW 18
+#define DUTY_BRAKE 2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -143,8 +147,7 @@ static void MX_TIM10_Init(void);
 uint32_t cnt_full = 0;
 uint32_t cnt_high = 0;
 float duty_deadman = 0;
-float duty_MA = 0;
-float duty_alpha = 0.5;
+float duty_alpha = 1.0;
 int duty_motor; // Lassú menés: 10 Gyors menés: 40
 /* USER CODE END 0 */
 
@@ -271,23 +274,16 @@ int main(void)
 	  p = LS_p(line_pos[0]);
 	  pwm_val = MotorDrive(&htim4, duty_motor);
 	  ServoPosition(&htim5, str_angle);
-	  if(duty_MA>10){
+	  if(duty_deadman>10 && duty_deadman < 15){
 		  HAL_GPIO_WritePin(DRV_EN_GPIO_Port, DRV_EN_Pin, GPIO_PIN_SET);
 		  }
 	  else
 		  HAL_GPIO_WritePin(DRV_EN_GPIO_Port, DRV_EN_Pin, GPIO_PIN_RESET);
 
-//	  sprintf((char*)BT_send_msg_buff, "Duty_motor: %d  PWM: %d\n\r", duty_motor, pwm_val);
-//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
-
-	  //	float kp=-0.75;
-	  //	float kd=1.0;
-	  //	float kp=-10;
-	  //	float kd=0.0;
 
 	  switch(circuit_Section) {
 	  	  case Fast_section:
-			duty_motor = 80;
+			duty_motor = DUTY_FAST;
 			str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
 			if (decel_end_flag == 0 && 10000 < MA_sum_front){
 			  // kb. 2 másodpercenkétn előidéz egy interruptot
@@ -297,7 +293,7 @@ int main(void)
 			break;
 	  	  case Braking:
 	  		chicane_coming=true;
-	  		duty_motor = 8;
+	  		duty_motor = DUTY_BRAKE;
 	  		str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
 	  		if (decel_end_flag == 3){
 				HAL_TIM_Base_Stop_IT(&htim7);
@@ -316,16 +312,16 @@ int main(void)
 //			}
 //	  		break;
 	  	  case Slow_section:
-	  		duty_motor = 20;
+	  		duty_motor = DUTY_SLOW;
 	  		str_angle = SteeringAngle(p, delta, KP_SLOW, KD_SLOW);
 	  		if (MA_sum_front < 8000){
 	  			 circuit_Section = Slow_waiting;
 	  		}
 	  		break;
 	  	  case Slow_waiting:
-	  		duty_motor = 20;
+	  		duty_motor = DUTY_SLOW;
 			str_angle = SteeringAngle(p, delta, KP_SLOW, KD_SLOW);
-	  		if (decel_end_flag == 0 && 10000 < MA_sum_front){
+	  		if (decel_end_flag == 0 && 9000 < MA_sum_front){
 	  			HAL_TIM_Base_Start_IT(&htim7);
 	  			circuit_Section = Acceleration;
 	  		}
@@ -339,7 +335,7 @@ int main(void)
 //			}
 //			break;
 	  	  case Acceleration:
-	  		duty_motor = 80;
+	  		duty_motor = DUTY_FAST;
 	  		str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
 	  		if (decel_end_flag == 2){
 				HAL_TIM_Base_Stop_IT(&htim7);
@@ -348,9 +344,10 @@ int main(void)
 			}
 	  		break;
 	  }
-	  sprintf( (char*)BT_send_msg_buff, "ToF1: %d, %d, %.2f, %.2f\n\r", RangingData.RangeStatus, RangingData.RangeMilliMeter,
-			  	  	  ( RangingData.SignalRateRtnMegaCps / 65536.0 ), RangingData.AmbientRateRtnMegaCps / 65336.0 );
-	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+//
+//
+//	  sprintf( (char*)BT_send_msg_buff, "STR: %f\n\r", str_angle);
+//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
 
 //	  if (buttonMessageFlag){
@@ -371,10 +368,8 @@ int main(void)
 //	                sprintf((char*)BT_send_msg_buff, "ToF1 not ready\n\r");
 //	            }
 
-//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
-//	  HAL_Delay(10);
 //	  VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
-//	  HAL_Delay (100);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -812,7 +807,7 @@ static void MX_TIM3_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 1000;
+  sConfigOC.Pulse = 1900;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
@@ -971,7 +966,7 @@ static void MX_TIM7_Init(void)
   htim7.Instance = TIM7;
   htim7.Init.Prescaler = 10000-1;
   htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim7.Init.Period = 5000-1;
+  htim7.Init.Period = 4500-1;
   htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
   {
@@ -1264,7 +1259,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 		cnt_high = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) + 2;
 
 		duty_deadman = (float) 100 * cnt_high / cnt_full;
-		duty_MA = duty_alpha * duty_deadman + (1-duty_alpha) * duty_MA;
+//		duty_MA = duty_alpha * duty_deadman + (1-duty_alpha) * duty_MA;
 	}
 }
 
