@@ -14,6 +14,7 @@ typedef enum circuit_section
 
 int MotorDrive(TIM_HandleTypeDef* const pwmHandle, int pwm_val);
 
-int MotorFollowControl(int* prev_error, int current_distance_front, int current_distance_tilted, circuit_section circuit_section);
+int MotorFollowControl(int* prev_error, int current_distance_front, int current_distance_tilted, circuit_section circuit_section,
+		int* integral, int slow_sec_nr);
 
 #endif /* INC_MOTOR_H_ */

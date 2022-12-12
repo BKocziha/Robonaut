@@ -8,7 +8,8 @@ int MotorDrive(TIM_HandleTypeDef* const pwmHandle, int duty)
 	return pwm_val;
 }
 
-int MotorFollowControl(int* prev_error, int current_distance_front, int current_distance_tilted, circuit_section circuit_section)
+int MotorFollowControl(int* prev_error, int current_distance_front, int current_distance_tilted, circuit_section circuit_section,
+		int* integral, int slow_sec_nr)
 {
 	int new_duty_motor;
 	int current_distance;
@@ -26,8 +27,10 @@ int MotorFollowControl(int* prev_error, int current_distance_front, int current_
 //	}
 
 	int error = reference_distance-current_distance;
+	*integral = *integral + error;
+
 	int d_error = error - *prev_error;
-	new_duty_motor = -error/20 + d_error/10;
+	new_duty_motor = -error/25 + d_error/12;
 	*prev_error = error;
 	switch(circuit_section) {
 		case Slow_section:
@@ -39,12 +42,14 @@ int MotorFollowControl(int* prev_error, int current_distance_front, int current_
 				new_duty_motor = 40;
 			break;
 		case Braking:
-			if (new_duty_motor > 10)
-				new_duty_motor = 10;
+			if (new_duty_motor > 20)
+				new_duty_motor = 20;
 			break;
 		case Slow_waiting:
-			if (new_duty_motor > 18)
-				new_duty_motor = 18;
+			if (slow_sec_nr > 3)
+				new_duty_motor = 17;
+			else
+				new_duty_motor = 19;
 			break;
 		case Acceleration:
 			if (new_duty_motor > 40)

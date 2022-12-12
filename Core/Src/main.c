@@ -48,8 +48,8 @@
 #define ADC_7 48
 #define ADC_8 56
 
-#define KP_SLOW -5.7032 //-10 //-5
-#define KD_SLOW 0.3235
+#define KP_SLOW -5 //-10 //-5
+#define KD_SLOW 0.42
 #define KP_FAST -0.7188
 #define KD_FAST 0.5894
 
@@ -113,6 +113,7 @@ VL53L1_Dev_t  vl53l1_2; // ToF2
 VL53L1_DEV    Dev2 = &vl53l1_2;
 uint8_t DataReady1, DataReady2;
 int prev_error = 0;
+int integral = 0;
 
 // Flags
 bool BTMessageFlag = false;
@@ -165,7 +166,7 @@ int duty_motor;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	int slow_sec_nr = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -237,12 +238,12 @@ int main(void)
 
 //  /*** VL53L1X Initialization ***/
   // Dev1
-  VL53L1_WaitDeviceBooted( Dev1 );
-  VL53L1_DataInit( Dev1 );
-  VL53L1_StaticInit( Dev1 );
-  VL53L1_SetDistanceMode( Dev1, VL53L1_DISTANCEMODE_LONG );
-  VL53L1_SetMeasurementTimingBudgetMicroSeconds( Dev1, 20000 );
-  VL53L1_SetInterMeasurementPeriodMilliSeconds( Dev1, 25 );
+//  VL53L1_WaitDeviceBooted( Dev1 );
+//  VL53L1_DataInit( Dev1 );
+//  VL53L1_StaticInit( Dev1 );
+//  VL53L1_SetDistanceMode( Dev1, VL53L1_DISTANCEMODE_LONG );
+//  VL53L1_SetMeasurementTimingBudgetMicroSeconds( Dev1, 20000 );
+//  VL53L1_SetInterMeasurementPeriodMilliSeconds( Dev1, 25 );
 
 
 
@@ -251,11 +252,11 @@ int main(void)
   VL53L1_DataInit( Dev2 );
   VL53L1_StaticInit( Dev2 );
   VL53L1_SetDistanceMode( Dev2, VL53L1_DISTANCEMODE_LONG );
-  VL53L1_SetMeasurementTimingBudgetMicroSeconds( Dev2, 20000 );
-  VL53L1_SetInterMeasurementPeriodMilliSeconds( Dev2, 25 );
+  VL53L1_SetMeasurementTimingBudgetMicroSeconds( Dev2, 50000 );
+  VL53L1_SetInterMeasurementPeriodMilliSeconds( Dev2, 70 );
 
   // Start ToF measurement
-  VL53L1_StartMeasurement( Dev1 );
+//  VL53L1_StartMeasurement( Dev1 );
   VL53L1_StartMeasurement( Dev2 );
 
 
@@ -324,19 +325,20 @@ int main(void)
 				HAL_TIM_Base_Stop_IT(&htim7);
 				decel_end_flag =0;
 				circuit_Section = Slow_section;
+				slow_sec_nr++;
 			}
 	  		break;
 	  	  case Slow_section:
 	  		//duty_motor = DUTY_SLOW;
 	  		str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
-	  		if (MA_sum_front < 8000){
+	  		if (MA_sum_front < 7000){
 	  			 circuit_Section = Slow_waiting;
 	  		}
 	  		break;
 	  	  case Slow_waiting:
 	  		//duty_motor = DUTY_SLOW;
 			str_angle = SteeringAngle(p, delta, KP_SLOW, KD_SLOW);
-	  		if (decel_end_flag == 0 && 9000 < MA_sum_front){
+	  		if (decel_end_flag == 0 && 7500 < MA_sum_front){
 	  			HAL_TIM_Base_Start_IT(&htim7);
 	  			circuit_Section = Acceleration;
 	  		}
@@ -352,11 +354,15 @@ int main(void)
 	  		break;
 	  }
 
-	  duty_motor = MotorFollowControl(&prev_error, RangingData2.RangeMilliMeter, RangingData1.RangeMilliMeter, circuit_Section);
+	  duty_motor = MotorFollowControl(&prev_error, RangingData2.RangeMilliMeter, RangingData1.RangeMilliMeter, circuit_Section,
+			  &integral, slow_sec_nr);
+
+//	  	  sprintf( (char*)BT_send_msg_buff, "ToF2: %d\n\r", integral );
+//	  	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
 
-
-//	  sprintf( (char*)BT_send_msg_buff, "DST1 %d, DST2 %d, Duty: %d\n\r", RangingData1.RangeMilliMeter, RangingData2.RangeMilliMeter, duty_motor);
+//	  sprintf( (char*)BT_send_msg_buff, "ToF2: %d, %d, %.2f, %.2f\n\r", RangingData2.RangeStatus, RangingData2.RangeMilliMeter,
+//			  ( RangingData2.SignalRateRtnMegaCps / 65536.0 ), RangingData2.AmbientRateRtnMegaCps / 65336.0 );
 //	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
 
@@ -1232,10 +1238,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		VL53L1_GetMeasurementDataReady  ( Dev2,  &DataReady2 ) ;
 		if(DataReady2 == 1){
 			VL53L1_GetRangingMeasurementData( Dev2, &RangingData2 );
-		}
 
 		VL53L1_ClearInterruptAndStartMeasurement( Dev2 );
-
+		if(RangingData2.RangeMilliMeter>2000){RangingData2.RangeMilliMeter=2000;}
+		if(RangingData2.RangeMilliMeter<1){RangingData2.RangeMilliMeter=10;}
 //		if (circuit_Section == Slow_section || circuit_Section == Slow_waiting){
 //			VL53L1_GetMeasurementDataReady  ( Dev1,  &DataReady1 ) ;
 //			if(DataReady1 == 1){
@@ -1244,6 +1250,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 //
 //			VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
 //		}
+	  }
 	  }
 }
 
