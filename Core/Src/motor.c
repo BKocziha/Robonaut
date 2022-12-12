@@ -29,31 +29,31 @@ int MotorFollowControl(int* prev_error, int current_distance_front, int current_
 	int d_error = error - *prev_error;
 	new_duty_motor = -error/20 + d_error/50;
 	*prev_error = error;
-//	switch(circuit_section) {
-//		case Slow_section:
-//			if (new_duty_motor > 18)
-//				new_duty_motor = 18;
-//			break;
-//		case Fast_section:
-//			if (new_duty_motor > 30)
-//				new_duty_motor = 30;
-//			break;
-//		case Braking:
-//			if (new_duty_motor > 30)
-//				new_duty_motor = 30;
-//			break;
-//		case Slow_waiting:
-//			if (new_duty_motor > 18)
-//				new_duty_motor = 18;
-//			break;
-//		case Acceleration:
-//			if (new_duty_motor > 30)
-//				new_duty_motor = 30;
-//			break;
-//	}
-	if (new_duty_motor > 25)
-			new_duty_motor = 25;
-	if (new_duty_motor < 2)
-		new_duty_motor = 2;
-	return new_duty_motor;
+	switch(circuit_section) {
+		case Slow_section:
+			if (new_duty_motor > 18)
+				new_duty_motor = 18;
+			break;
+		case Fast_section:
+			if (new_duty_motor > 30)
+				new_duty_motor = 30;
+			break;
+		case Braking:
+			if (new_duty_motor > 10)
+				new_duty_motor = 10;
+			break;
+		case Slow_waiting:
+			if (new_duty_motor > 18)
+				new_duty_motor = 18;
+			break;
+		case Acceleration:
+			if (new_duty_motor > 30)
+				new_duty_motor = 30;
+			break;
+	}
+//	if (new_duty_motor > 25)
+//2				new_duty_motor = 25;
+		if (new_duty_motor < 2)
+			new_duty_motor = 2;
+		return new_duty_motor;
 }
