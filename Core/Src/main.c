@@ -310,7 +310,7 @@ int main(void)
 	  	  case Fast_section:
 			//duty_motor = DUTY_FAST;
 			str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
-			if (decel_end_flag == 0 && 10000 < MA_sum_front){
+			if (decel_end_flag == 0 && 12000 < MA_sum_front){
 			  // kb. 2 másodpercenkétn előidéz egy interruptot
 			  HAL_TIM_Base_Start_IT(&htim7);
 			  circuit_Section = Braking;
@@ -320,7 +320,7 @@ int main(void)
 	  		chicane_coming=true;
 	  		//duty_motor = DUTY_BRAKE;
 	  		str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
-	  		if (decel_end_flag == 3){
+	  		if (decel_end_flag == 2){
 				HAL_TIM_Base_Stop_IT(&htim7);
 				decel_end_flag =0;
 				circuit_Section = Slow_section;
@@ -328,7 +328,7 @@ int main(void)
 	  		break;
 	  	  case Slow_section:
 	  		//duty_motor = DUTY_SLOW;
-	  		str_angle = SteeringAngle(p, delta, KP_SLOW, KD_SLOW);
+	  		str_angle = SteeringAngle(p, delta, KP_FAST, KD_FAST);
 	  		if (MA_sum_front < 8000){
 	  			 circuit_Section = Slow_waiting;
 	  		}
@@ -1236,14 +1236,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 		VL53L1_ClearInterruptAndStartMeasurement( Dev2 );
 
-		if (circuit_Section == Slow_section || circuit_Section == Slow_waiting){
-			VL53L1_GetMeasurementDataReady  ( Dev1,  &DataReady1 ) ;
-			if(DataReady1 == 1){
-				VL53L1_GetRangingMeasurementData( Dev1, &RangingData1 );
-			}
-
-			VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
-		}
+//		if (circuit_Section == Slow_section || circuit_Section == Slow_waiting){
+//			VL53L1_GetMeasurementDataReady  ( Dev1,  &DataReady1 ) ;
+//			if(DataReady1 == 1){
+//				VL53L1_GetRangingMeasurementData( Dev1, &RangingData1 );
+//			}
+//
+//			VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
+//		}
 	  }
 }
 
