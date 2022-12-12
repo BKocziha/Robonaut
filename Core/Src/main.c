@@ -79,7 +79,6 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim7;
-TIM_HandleTypeDef htim10;
 TIM_HandleTypeDef htim13;
 
 UART_HandleTypeDef huart2;
@@ -135,7 +134,6 @@ static void MX_I2C2_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_TIM7_Init(void);
-static void MX_TIM10_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -194,7 +192,6 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART6_UART_Init();
   MX_TIM7_Init();
-  MX_TIM10_Init();
   /* USER CODE BEGIN 2 */
 
   // initialize vl53l1x communication parameters
@@ -254,7 +251,6 @@ int main(void)
   HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1); // Dead man switch PWM input
   HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_2);    // Dead man switch PWM input
 
-  HAL_TIM_Base_Start_IT(&htim10);
   HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
@@ -738,7 +734,7 @@ static void MX_TIM2_Init(void)
   }
   sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
-  sConfigIC.ICPrescaler = TIM_ICPSC_DIV8;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
   sConfigIC.ICFilter = 0;
   if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
   {
@@ -985,37 +981,6 @@ static void MX_TIM7_Init(void)
 }
 
 /**
-  * @brief TIM10 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM10_Init(void)
-{
-
-  /* USER CODE BEGIN TIM10_Init 0 */
-
-  /* USER CODE END TIM10_Init 0 */
-
-  /* USER CODE BEGIN TIM10_Init 1 */
-
-  /* USER CODE END TIM10_Init 1 */
-  htim10.Instance = TIM10;
-  htim10.Init.Prescaler = 45000-1;
-  htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim10.Init.Period = 400-1;
-  htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim10.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM10_Init 2 */
-
-  /* USER CODE END TIM10_Init 2 */
-
-}
-
-/**
   * @brief TIM13 Initialization Function
   * @param None
   * @retval None
@@ -1242,15 +1207,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 //		}
 //		}
 	}
-	if (htim == &htim10 )
-	  {
-		VL53L1_GetMeasurementDataReady  ( Dev1,  &DataReady ) ;
-		if(DataReady == 1){
-			VL53L1_GetRangingMeasurementData( Dev1, &RangingData );
-		}
-
-		VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
-	  }
+//	if (htim == &htim10 )
+//	  {
+//		VL53L1_GetMeasurementDataReady  ( Dev1,  &DataReady ) ;
+//		if(DataReady == 1){
+//			VL53L1_GetRangingMeasurementData( Dev1, &RangingData );
+//		}
+//
+//		VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
+//	  }
 }
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
