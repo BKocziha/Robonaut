@@ -153,8 +153,8 @@ enum circuit_section circuit_Section;
 // Will be calculated in interrupt callback
 uint32_t cnt_full = 0;
 uint32_t cnt_high = 0;
-float duty_deadman = 0;
-float duty_alpha = 1.0;
+int duty_deadman = 0;
+int duty_alpha = 1.0;
 int duty_motor;
 /* USER CODE END 0 */
 
@@ -1252,7 +1252,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 		cnt_full = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) + 2;
 		cnt_high = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) + 2;
 
-		duty_deadman = (float) 100 * cnt_high / cnt_full;
+		duty_deadman = (100 * cnt_high) / cnt_full;
 	}
 }
 
