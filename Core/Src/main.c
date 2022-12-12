@@ -53,9 +53,9 @@
 #define KP_FAST -0.7188
 #define KD_FAST 0.5894
 
-#define DUTY_FAST 60
-#define DUTY_SLOW 18
-#define DUTY_BRAKE 2
+#define DUTY_FAST 50 //60
+#define DUTY_SLOW 18 //18
+#define DUTY_BRAKE 5 //2
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/

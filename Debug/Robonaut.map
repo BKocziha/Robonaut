@@ -590,7 +590,6 @@ Discarded input sections
                 0x0000000000000000        0x1 ./Core/Src/main.o
  .bss.DriveEnableFlag
                 0x0000000000000000        0x1 ./Core/Src/main.o
- .bss.duty_MA   0x0000000000000000        0x4 ./Core/Src/main.o
  .data.duty_alpha
                 0x0000000000000000        0x4 ./Core/Src/main.o
  .text.HAL_GPIO_EXTI_Callback
@@ -9286,35 +9285,35 @@ LOAD c:/st/stm32cubeide_1.10.1/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.ext
 LOAD c:/st/stm32cubeide_1.10.1/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.10.3-2021.10.win32_1.0.100.202210260954/tools/bin/../lib/gcc/arm-none-eabi/10.3.1/../../../../arm-none-eabi/lib/thumb/v7e-m+fp/hard\libm.a
 LOAD c:/st/stm32cubeide_1.10.1/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.10.3-2021.10.win32_1.0.100.202210260954/tools/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m+fp/hard\libgcc.a
 
-.debug_info     0x0000000000000000    0x2e6c8
+.debug_info     0x0000000000000000    0x2e6b6
  .debug_info    0x0000000000000000     0x1138 ./Core/Src/linesensor.o
- .debug_info    0x0000000000001138     0x418f ./Core/Src/main.o
- .debug_info    0x00000000000052c7      0x6a8 ./Core/Src/motor.o
- .debug_info    0x000000000000596f      0x747 ./Core/Src/servo.o
- .debug_info    0x00000000000060b6     0x1cca ./Core/Src/stm32f4xx_hal_msp.o
- .debug_info    0x0000000000007d80      0x790 ./Core/Src/stm32f4xx_it.o
- .debug_info    0x0000000000008510      0x55b ./Core/Src/system_stm32f4xx.o
- .debug_info    0x0000000000008a6b       0x22 ./Core/Startup/startup_stm32f446retx.o
- .debug_info    0x0000000000008a8d      0x9d2 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
- .debug_info    0x000000000000945f      0xd70 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.o
- .debug_info    0x000000000000a1cf      0xe39 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.o
- .debug_info    0x000000000000b008      0x7be ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.o
- .debug_info    0x000000000000b7c6     0x2617 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.o
- .debug_info    0x000000000000dddd      0x702 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.o
- .debug_info    0x000000000000e4df      0x9ab ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.o
- .debug_info    0x000000000000ee8a      0x9ec ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.o
- .debug_info    0x000000000000f876     0x1758 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.o
- .debug_info    0x0000000000010fce     0x2bbe ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
- .debug_info    0x0000000000013b8c     0x15e0 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
- .debug_info    0x000000000001516c     0x31bc ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.o
- .debug_info    0x0000000000018328     0x4f18 ./Drivers/VL53L1X/core/src/vl53l1_api.o
- .debug_info    0x000000000001d240     0x43b7 ./Drivers/VL53L1X/core/src/vl53l1_api_core.o
- .debug_info    0x00000000000215f7     0x14dc ./Drivers/VL53L1X/core/src/vl53l1_api_preset_modes.o
- .debug_info    0x0000000000022ad3     0x3a98 ./Drivers/VL53L1X/core/src/vl53l1_core.o
- .debug_info    0x000000000002656b      0x185 ./Drivers/VL53L1X/core/src/vl53l1_core_support.o
- .debug_info    0x00000000000266f0     0x2d66 ./Drivers/VL53L1X/core/src/vl53l1_register_funcs.o
- .debug_info    0x0000000000029456     0x27c0 ./Drivers/VL53L1X/core/src/vl53l1_wait.o
- .debug_info    0x000000000002bc16     0x2ab2 ./Drivers/VL53L1X/platform/src/vl53l1_platform.o
+ .debug_info    0x0000000000001138     0x417d ./Core/Src/main.o
+ .debug_info    0x00000000000052b5      0x6a8 ./Core/Src/motor.o
+ .debug_info    0x000000000000595d      0x747 ./Core/Src/servo.o
+ .debug_info    0x00000000000060a4     0x1cca ./Core/Src/stm32f4xx_hal_msp.o
+ .debug_info    0x0000000000007d6e      0x790 ./Core/Src/stm32f4xx_it.o
+ .debug_info    0x00000000000084fe      0x55b ./Core/Src/system_stm32f4xx.o
+ .debug_info    0x0000000000008a59       0x22 ./Core/Startup/startup_stm32f446retx.o
+ .debug_info    0x0000000000008a7b      0x9d2 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
+ .debug_info    0x000000000000944d      0xd70 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.o
+ .debug_info    0x000000000000a1bd      0xe39 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.o
+ .debug_info    0x000000000000aff6      0x7be ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.o
+ .debug_info    0x000000000000b7b4     0x2617 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.o
+ .debug_info    0x000000000000ddcb      0x702 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.o
+ .debug_info    0x000000000000e4cd      0x9ab ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.o
+ .debug_info    0x000000000000ee78      0x9ec ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.o
+ .debug_info    0x000000000000f864     0x1758 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.o
+ .debug_info    0x0000000000010fbc     0x2bbe ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
+ .debug_info    0x0000000000013b7a     0x15e0 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
+ .debug_info    0x000000000001515a     0x31bc ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.o
+ .debug_info    0x0000000000018316     0x4f18 ./Drivers/VL53L1X/core/src/vl53l1_api.o
+ .debug_info    0x000000000001d22e     0x43b7 ./Drivers/VL53L1X/core/src/vl53l1_api_core.o
+ .debug_info    0x00000000000215e5     0x14dc ./Drivers/VL53L1X/core/src/vl53l1_api_preset_modes.o
+ .debug_info    0x0000000000022ac1     0x3a98 ./Drivers/VL53L1X/core/src/vl53l1_core.o
+ .debug_info    0x0000000000026559      0x185 ./Drivers/VL53L1X/core/src/vl53l1_core_support.o
+ .debug_info    0x00000000000266de     0x2d66 ./Drivers/VL53L1X/core/src/vl53l1_register_funcs.o
+ .debug_info    0x0000000000029444     0x27c0 ./Drivers/VL53L1X/core/src/vl53l1_wait.o
+ .debug_info    0x000000000002bc04     0x2ab2 ./Drivers/VL53L1X/platform/src/vl53l1_platform.o
 
 .debug_abbrev   0x0000000000000000     0x3b75
  .debug_abbrev  0x0000000000000000      0x2aa ./Core/Src/linesensor.o
@@ -9534,62 +9533,62 @@ LOAD c:/st/stm32cubeide_1.10.1/stm32cubeide/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_line    0x000000000002162f      0xe7b ./Drivers/VL53L1X/core/src/vl53l1_wait.o
  .debug_line    0x00000000000224aa      0xf06 ./Drivers/VL53L1X/platform/src/vl53l1_platform.o
 
-.debug_str      0x0000000000000000   0x1027f9
+.debug_str      0x0000000000000000   0x1027f1
  .debug_str     0x0000000000000000    0xdd438 ./Core/Src/linesensor.o
                                       0xdd7a6 (size before relaxing)
- .debug_str     0x00000000000dd438    0x19923 ./Core/Src/main.o
-                                      0xf73d3 (size before relaxing)
- .debug_str     0x00000000000f6d5b       0x23 ./Core/Src/motor.o
+ .debug_str     0x00000000000dd438    0x1991b ./Core/Src/main.o
+                                      0xf73cb (size before relaxing)
+ .debug_str     0x00000000000f6d53       0x23 ./Core/Src/motor.o
                                       0xd8dae (size before relaxing)
- .debug_str     0x00000000000f6d7e       0x1f ./Core/Src/servo.o
+ .debug_str     0x00000000000f6d76       0x1f ./Core/Src/servo.o
                                       0xdc391 (size before relaxing)
- .debug_str     0x00000000000f6d9d      0x69b ./Core/Src/stm32f4xx_hal_msp.o
+ .debug_str     0x00000000000f6d95      0x69b ./Core/Src/stm32f4xx_hal_msp.o
                                       0xd9d83 (size before relaxing)
- .debug_str     0x00000000000f7438      0x125 ./Core/Src/stm32f4xx_it.o
+ .debug_str     0x00000000000f7430      0x125 ./Core/Src/stm32f4xx_it.o
                                       0xd8eb6 (size before relaxing)
- .debug_str     0x00000000000f755d       0xdb ./Core/Src/system_stm32f4xx.o
+ .debug_str     0x00000000000f7555       0xdb ./Core/Src/system_stm32f4xx.o
                                       0xd858f (size before relaxing)
- .debug_str     0x00000000000f7638       0x36 ./Core/Startup/startup_stm32f446retx.o
+ .debug_str     0x00000000000f7630       0x36 ./Core/Startup/startup_stm32f446retx.o
                                          0x5f (size before relaxing)
- .debug_str     0x00000000000f766e      0x5e1 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
+ .debug_str     0x00000000000f7666      0x5e1 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
                                       0xd9154 (size before relaxing)
- .debug_str     0x00000000000f7c4f      0x2c3 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.o
+ .debug_str     0x00000000000f7c47      0x2c3 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.o
                                       0xd8b57 (size before relaxing)
- .debug_str     0x00000000000f7f12      0x31c ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.o
+ .debug_str     0x00000000000f7f0a      0x31c ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.o
                                       0xd8e62 (size before relaxing)
- .debug_str     0x00000000000f822e       0xfc ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.o
+ .debug_str     0x00000000000f8226       0xfc ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.o
                                       0xd870a (size before relaxing)
- .debug_str     0x00000000000f832a      0xae4 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.o
+ .debug_str     0x00000000000f8322      0xae4 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.o
                                       0xd953a (size before relaxing)
- .debug_str     0x00000000000f8e0e      0x135 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.o
+ .debug_str     0x00000000000f8e06      0x135 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.o
                                       0xd8767 (size before relaxing)
- .debug_str     0x00000000000f8f43      0x213 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.o
+ .debug_str     0x00000000000f8f3b      0x213 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.o
                                       0xd89c8 (size before relaxing)
- .debug_str     0x00000000000f9156      0x312 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.o
+ .debug_str     0x00000000000f914e      0x312 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.o
                                       0xd89fb (size before relaxing)
- .debug_str     0x00000000000f9468      0x522 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.o
+ .debug_str     0x00000000000f9460      0x522 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.o
                                       0xd8e2e (size before relaxing)
- .debug_str     0x00000000000f998a      0xbc9 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
+ .debug_str     0x00000000000f9982      0xbc9 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
                                       0xd98e4 (size before relaxing)
- .debug_str     0x00000000000fa553      0x493 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
+ .debug_str     0x00000000000fa54b      0x493 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
                                       0xd9100 (size before relaxing)
- .debug_str     0x00000000000fa9e6      0x5e2 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.o
+ .debug_str     0x00000000000fa9de      0x5e2 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.o
                                       0xd8f3d (size before relaxing)
- .debug_str     0x00000000000fafc8     0x23a4 ./Drivers/VL53L1X/core/src/vl53l1_api.o
+ .debug_str     0x00000000000fafc0     0x23a4 ./Drivers/VL53L1X/core/src/vl53l1_api.o
                                       0xf786f (size before relaxing)
- .debug_str     0x00000000000fd36c     0x4489 ./Drivers/VL53L1X/core/src/vl53l1_api_core.o
+ .debug_str     0x00000000000fd364     0x4489 ./Drivers/VL53L1X/core/src/vl53l1_api_core.o
                                       0xf9cc2 (size before relaxing)
- .debug_str     0x00000000001017f5       0x88 ./Drivers/VL53L1X/core/src/vl53l1_api_preset_modes.o
+ .debug_str     0x00000000001017ed       0x88 ./Drivers/VL53L1X/core/src/vl53l1_api_preset_modes.o
                                       0xf4736 (size before relaxing)
- .debug_str     0x000000000010187d      0x788 ./Drivers/VL53L1X/core/src/vl53l1_core.o
+ .debug_str     0x0000000000101875      0x788 ./Drivers/VL53L1X/core/src/vl53l1_core.o
                                       0xf6fb7 (size before relaxing)
- .debug_str     0x0000000000102005       0x3c ./Drivers/VL53L1X/core/src/vl53l1_core_support.o
+ .debug_str     0x0000000000101ffd       0x3c ./Drivers/VL53L1X/core/src/vl53l1_core_support.o
                                       0xf1779 (size before relaxing)
- .debug_str     0x0000000000102041      0x2ad ./Drivers/VL53L1X/core/src/vl53l1_register_funcs.o
+ .debug_str     0x0000000000102039      0x2ad ./Drivers/VL53L1X/core/src/vl53l1_register_funcs.o
                                       0xf4e1e (size before relaxing)
- .debug_str     0x00000000001022ee      0x1a9 ./Drivers/VL53L1X/core/src/vl53l1_wait.o
+ .debug_str     0x00000000001022e6      0x1a9 ./Drivers/VL53L1X/core/src/vl53l1_wait.o
                                       0xf556f (size before relaxing)
- .debug_str     0x0000000000102497      0x362 ./Drivers/VL53L1X/platform/src/vl53l1_platform.o
+ .debug_str     0x000000000010248f      0x362 ./Drivers/VL53L1X/platform/src/vl53l1_platform.o
                                       0xf5de3 (size before relaxing)
 
 .comment        0x0000000000000000       0x50
