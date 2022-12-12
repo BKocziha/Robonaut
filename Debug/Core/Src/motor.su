@@ -1,2 +1,2 @@
-../Core/Src/motor.c:3:5:MotorDrive	24	static
-../Core/Src/motor.c:10:5:MotorFollowControl	32	static
+../Core/Src/motor.c:4:5:MotorDrive	24	static
+../Core/Src/motor.c:11:5:MotorFollowControl	48	static

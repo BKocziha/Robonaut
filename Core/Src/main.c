@@ -101,13 +101,17 @@ bool lightIsOn = false;
 int MA_sum_front = 0;
 int MA_sum_rear = 0;
 int summ, summ2;
-enum circuit_section {Slow_section, Fast_section, Braking, Slow_waiting, Acceleration};
+//typedef enum circuit_section
+//	{Slow_section, Fast_section, Braking, Slow_waiting, Acceleration}
+//	circuit_section;
 
 // Initialize ToF
-VL53L1_RangingMeasurementData_t RangingData;
+VL53L1_RangingMeasurementData_t RangingData1, RangingData2;
 VL53L1_Dev_t  vl53l1_1; // ToF1
 VL53L1_DEV    Dev1 = &vl53l1_1;
-uint8_t DataReady;
+VL53L1_Dev_t  vl53l1_2; // ToF2
+VL53L1_DEV    Dev2 = &vl53l1_2;
+uint8_t DataReady1, DataReady2;
 int prev_error = 0;
 
 // Flags
@@ -143,6 +147,8 @@ static void MX_TIM10_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+enum circuit_section circuit_Section;
 
 // Will be calculated in interrupt callback
 uint32_t cnt_full = 0;
@@ -202,40 +208,55 @@ int main(void)
   Dev1->I2cHandle = &hi2c2;
   Dev1->I2cDevAddr = 0x52;
 
-//  // all ToF reset
-//  HAL_GPIO_WritePin(XSHUT2_GPIO_Port, XSHUT2_Pin, GPIO_PIN_RESET);
-//  HAL_Delay(2); // 2ms reset time
-//  HAL_GPIO_WritePin(XSHUT1_GPIO_Port, XSHUT1_Pin, GPIO_PIN_RESET);
-//  HAL_Delay(2); // 2ms reset time
+  Dev2->I2cHandle = &hi2c2;
+  Dev2->I2cDevAddr = 0x52;
+
+  // all ToF reset
+  HAL_GPIO_WritePin(ToF_XSDN_36_GPIO_Port, ToF_XSDN_36_Pin, GPIO_PIN_RESET);
+  HAL_Delay(2); // 2ms reset time
+  HAL_GPIO_WritePin(ToF_XSDN_14_GPIO_Port, ToF_XSDN_14_Pin, GPIO_PIN_RESET);
+  HAL_Delay(2); // 2ms reset time
 
   // set ToF1
   HAL_GPIO_WritePin(ToF_XSDN_36_GPIO_Port, ToF_XSDN_36_Pin, GPIO_PIN_SET);
   HAL_Delay(2);
 
-//  // set the address of ToF1
-//  VL53L1_SetDeviceAddress  ( Dev1,  0x42 ); // Dev1 new address 0x42
-//  HAL_Delay(10);
-//  Dev1->I2cDevAddr = 0x42; // set Dev1 0x42
-//
-//  // set ToF2
-//  HAL_GPIO_WritePin(XSHUT2_GPIO_Port, XSHUT2_Pin, GPIO_PIN_SET);
-//  HAL_Delay(2);
-//
-//  // set the address of ToF2
-//  VL53L1_SetDeviceAddress  ( Dev2,  0x50 ); // Dev2 new address 0x50
-//  HAL_Delay(10);
-//  Dev2->I2cDevAddr = 0x50; // set Dev2 0x50
+  // set the address of ToF1
+  VL53L1_SetDeviceAddress  ( Dev1,  0x42 ); // Dev1 new address 0x42
+  HAL_Delay(10);
+  Dev1->I2cDevAddr = 0x42; // set Dev1 0x42
+
+  // set ToF2
+  HAL_GPIO_WritePin(ToF_XSDN_14_GPIO_Port, ToF_XSDN_14_Pin, GPIO_PIN_SET);
+  HAL_Delay(2);
+
+  // set the address of ToF2
+  VL53L1_SetDeviceAddress  ( Dev2,  0x50 ); // Dev2 new address 0x50
+  HAL_Delay(10);
+  Dev2->I2cDevAddr = 0x50; // set Dev2 0x50
 
 //  /*** VL53L1X Initialization ***/
-//  // Dev1
+  // Dev1
   VL53L1_WaitDeviceBooted( Dev1 );
   VL53L1_DataInit( Dev1 );
   VL53L1_StaticInit( Dev1 );
   VL53L1_SetDistanceMode( Dev1, VL53L1_DISTANCEMODE_LONG );
   VL53L1_SetMeasurementTimingBudgetMicroSeconds( Dev1, 20000 );
   VL53L1_SetInterMeasurementPeriodMilliSeconds( Dev1, 25 );
-  VL53L1_StartMeasurement( Dev1 );
 
+
+
+  // Dev2
+  VL53L1_WaitDeviceBooted( Dev2 );
+  VL53L1_DataInit( Dev2 );
+  VL53L1_StaticInit( Dev2 );
+  VL53L1_SetDistanceMode( Dev2, VL53L1_DISTANCEMODE_LONG );
+  VL53L1_SetMeasurementTimingBudgetMicroSeconds( Dev2, 20000 );
+  VL53L1_SetInterMeasurementPeriodMilliSeconds( Dev2, 25 );
+
+  // Start ToF measurement
+  VL53L1_StartMeasurement( Dev1 );
+  VL53L1_StartMeasurement( Dev2 );
 
 
   //unsigned char ADC_value_string[10];
@@ -247,12 +268,16 @@ int main(void)
   float line_pos[2];
 //  bool feedback_rear = false;
   float delta, p, str_angle;
-  enum circuit_section circuit_Section = Fast_section;
+  circuit_Section = Fast_section;
 //  circuit_Section = Fast_section;
   //LS_INF_Send(&hspi3, leds_off);
 
+  uint32_t riseData[100];
+  uint32_t fallData[100];
+
   HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1); // Dead man switch PWM input
   HAL_TIM_IC_Start(&htim2, TIM_CHANNEL_2);    // Dead man switch PWM input
+
 
   HAL_TIM_Base_Start_IT(&htim10);
   HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
@@ -327,11 +352,12 @@ int main(void)
 	  		break;
 	  }
 
-	  duty_motor = MotorFollowControl(&prev_error, RangingData.RangeMilliMeter);
+	  duty_motor = MotorFollowControl(&prev_error, RangingData2.RangeMilliMeter, RangingData1.RangeMilliMeter, circuit_Section);
 
 
-	  sprintf( (char*)BT_send_msg_buff, "DST: %d, Duty cycle: %d\n\r", RangingData.RangeMilliMeter, duty_motor);
-	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
+
+//	  sprintf( (char*)BT_send_msg_buff, "DST1 %d, DST2 %d, Duty: %d\n\r", RangingData1.RangeMilliMeter, RangingData2.RangeMilliMeter, duty_motor);
+//	  BT_TransmitMsg(&huart2, BT_send_msg_buff);
 
 
 //	  if (buttonMessageFlag){
@@ -974,7 +1000,7 @@ static void MX_TIM10_Init(void)
   htim10.Instance = TIM10;
   htim10.Init.Prescaler = 45000-1;
   htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim10.Init.Period = 400-1;
+  htim10.Init.Period = 800-1;
   htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim10.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
@@ -1192,10 +1218,7 @@ static void MX_GPIO_Init(void)
 //}
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-//	VL53L1_GetRangingMeasurementData( Dev1, &RangingData );
-//	sprintf( (char*)BT_send_msg_buff, "ToF1: %d, %d, %.2f, %.2f\n\r", RangingData.RangeStatus, RangingData.RangeMilliMeter,
-//			   ( RangingData.SignalRateRtnMegaCps / 65536.0 ), RangingData.AmbientRateRtnMegaCps / 65336.0 );
-//	VL53L1_ClearInterruptAndStartMeasurement(Dev1);
+
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -1206,12 +1229,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 	if (htim == &htim10 )
 	  {
-		VL53L1_GetMeasurementDataReady  ( Dev1,  &DataReady ) ;
-		if(DataReady == 1){
-			VL53L1_GetRangingMeasurementData( Dev1, &RangingData );
+		VL53L1_GetMeasurementDataReady  ( Dev2,  &DataReady2 ) ;
+		if(DataReady2 == 1){
+			VL53L1_GetRangingMeasurementData( Dev2, &RangingData2 );
 		}
 
-		VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
+		VL53L1_ClearInterruptAndStartMeasurement( Dev2 );
+
+		if (circuit_Section == Slow_section || circuit_Section == Slow_waiting){
+			VL53L1_GetMeasurementDataReady  ( Dev1,  &DataReady1 ) ;
+			if(DataReady1 == 1){
+				VL53L1_GetRangingMeasurementData( Dev1, &RangingData1 );
+			}
+
+			VL53L1_ClearInterruptAndStartMeasurement( Dev1 );
+		}
 	  }
 }
 
